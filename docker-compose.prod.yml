@@ -29,15 +29,17 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=bestkids_user
-      - DB_PASSWORD=bestkids_password_2024_prod
-      - DB_DATABASE=bestkids_db
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=bestkids_user
+      - DATABASE_PASSWORD=bestkids_password_2024_prod
+      - DATABASE_NAME=bestkids_db
       - JWT_SECRET=bestkids-jwt-secret-production-2024-secure
       - CORS_ORIGIN=http://217.154.191.3:3012
     depends_on:
       - postgres
+    volumes:
+      - ./backend/uploads:/app/uploads
     networks:
       - bestkids_network_prod
 
