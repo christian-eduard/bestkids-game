@@ -99,7 +99,7 @@ export default function SeñalarImagen({ exercise, onAnswer }: Props) {
             )}
 
             {/* Grid de Opciones */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
+            <div className={`grid grid-cols-2 ${exercise.content.options.length === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6 w-full max-w-5xl justify-center`}>
                 {exercise.content.options.map((option) => (
                     <motion.div
                         key={option.id}
