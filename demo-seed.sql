@@ -15,7 +15,7 @@ INSERT INTO avatars (name, emoji, price, unlock_points_required, unlock_level_re
 ('Astronauta', '👨‍🚀', 1000, 1000, 4, false, 'Sci-Fi', 'Épico'),
 ('Detective', '🕵️', 400, 400, 2, false, 'Profesiones', 'Común'),
 ('Superhéroe', '🦸', 1500, 1500, 5, false, 'Héroes', 'Legendario'),
-('Dinosaurio Rex', '🦖', 3000, 3000, 8, false, 'Prehistoria', 'Épico')
+('Dinosaurio Rex', '🦖', 3000, 3000, 8, false, 'Prehistoria', 'Épico');
 -- ACTUALIZAR ESTUDIANTES (DEMO MODE)
 -- Asignar puntos y monedas a todos los usuarios con rol 'student'
 UPDATE gamification_profiles 

@@ -6,7 +6,7 @@ import {
     UpdateDateColumn,
     OneToMany,
 } from 'typeorm';
-import { Unit } from './unit.entity';
+import { Unit } from '../../exercises/entities/unit.entity';
 
 @Entity('courses')
 export class Course {

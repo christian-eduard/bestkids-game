@@ -21,18 +21,16 @@ export class BackupService {
     }
 
     async createBackup() {
-        const dbName = this.configService.get('DB_DATABASE') || 'bestkids_db';
+        const dbName = this.configService.get('DATABASE_NAME') || 'bestkids_db';
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `backup-${dbName}-${timestamp}.sql`;
         const filepath = path.join(this.backupDir, filename);
 
         // NOTE: This assumes 'pg_dump' is in usage environment's PATH.
-        // For local dev without pg_dump, we might need a fallback or just log error.
-        // Also simpler command for Docker environments might be needed.
-        const password = this.configService.get('DB_PASSWORD');
-        const username = this.configService.get('DB_USERNAME') || 'postgres';
-        const host = this.configService.get('DB_HOST') || 'localhost';
-        const port = this.configService.get('DB_PORT') || '5432';
+        const password = this.configService.get('DATABASE_PASSWORD');
+        const username = this.configService.get('DATABASE_USER') || 'bestkids_user';
+        const host = this.configService.get('DATABASE_HOST') || 'bestkids_postgres';
+        const port = this.configService.get('DATABASE_PORT') || '5432';
 
         // PGPASSWORD env var is safe way to pass password to pg_dump
         const command = `PGPASSWORD='${password}' pg_dump -h ${host} -p ${port} -U ${username} -F p -b -v -f "${filepath}" ${dbName}`;

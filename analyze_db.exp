@@ -1,0 +1,28 @@
+#!/usr/bin/expect -f
+set timeout 60
+set password "k6kdDfT8"
+
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "docker-compose -f /opt/bestkids-game/docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -c \"
+SELECT 'Users' as table, count(*) FROM users
+UNION ALL
+SELECT 'Roles', count(*) FROM roles
+UNION ALL
+SELECT 'Centers', count(*) FROM centers
+UNION ALL
+SELECT 'Classes', count(*) FROM classes
+UNION ALL
+SELECT 'Exercises', count(*) FROM exercises
+UNION ALL
+SELECT 'Assignments', count(*) FROM assignments
+UNION ALL
+SELECT 'Avatars', count(*) FROM avatars
+UNION ALL
+SELECT 'Store Items', count(*) FROM store_items;
+\""
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}

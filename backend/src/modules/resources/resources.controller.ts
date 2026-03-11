@@ -39,6 +39,24 @@ export class ResourcesController {
         return this.resourcesService.findAll();
     }
 
+    @Get('categories')
+    @ApiOperation({ summary: 'Get distinct resource categories' })
+    async getCategories() {
+        return this.resourcesService.findCategories();
+    }
+
+    @Patch('categories/:name')
+    @ApiOperation({ summary: 'Rename a resource category' })
+    async updateCategory(@Param('name') name: string, @Body() data: { newName: string }) {
+        return this.resourcesService.updateCategory(name, data.newName);
+    }
+
+    @Delete('categories/:name')
+    @ApiOperation({ summary: 'Delete a category (resources moved to General)' })
+    async deleteCategory(@Param('name') name: string) {
+        return this.resourcesService.deleteCategory(name);
+    }
+
     @Get(':id')
     @ApiOperation({ summary: 'Get a specific resource by ID' })
     async findOne(@Param('id') id: string) {

@@ -1,0 +1,78 @@
+#!/usr/bin/expect -f
+set timeout 600
+set password "k6kdDfT8"
+
+# 1. Update Code on Server (via git or scp - sticking to scp for critical core files or assuming git pull)
+# We need to update backend/src/app.module.ts on the server.
+spawn scp -o StrictHostKeyChecking=no backend/src/app.module.ts root@217.154.191.3:/opt/bestkids-game/backend/src/app.module.ts
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 2. Update Dockerfile on Server
+spawn scp -o StrictHostKeyChecking=no backend/Dockerfile root@217.154.191.3:/opt/bestkids-game/backend/Dockerfile
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 3. Create assets directory on server and COPY assets
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "mkdir -p /opt/bestkids-game/backend/assets"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# Copy assets recursively
+spawn scp -r -o StrictHostKeyChecking=no frontend/public/assets/* root@217.154.191.3:/opt/bestkids-game/backend/assets/
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+
+# 4. Upload Seed
+spawn scp -o StrictHostKeyChecking=no nuclear-seed.sql root@217.154.191.3:/opt/bestkids-game/nuclear-seed.sql
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 5. Rebuild and Deploy
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && docker-compose -f docker-compose.prod.yml build backend && docker-compose -f docker-compose.prod.yml up -d backend"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 6. Execute Seed
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && cat nuclear-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+catch wait result
+exit [lindex $result 3]

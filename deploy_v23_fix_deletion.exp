@@ -1,0 +1,29 @@
+#!/usr/bin/expect -f
+
+set timeout 1800
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# Connect to remote for build and restart
+puts "Connecting to remote for full rebuild and restart..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Rebuilding both backend and frontend images (this may take a few minutes)..."
+send "docker-compose -f docker-compose.prod.yml up -d --build\r"
+expect "#"
+
+puts "Pruning unused images to save space..."
+send "docker image prune -f\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment with full rebuild and restart completed successfully!"

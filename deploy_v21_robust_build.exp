@@ -1,0 +1,55 @@
+#!/usr/bin/expect -f
+
+set timeout 1800
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# Upload updated files
+puts "Uploading updated frontend files..."
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/progress/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/progress/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/assignments/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/assignments/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/store/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/store/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/inventory/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/inventory/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+# Execute build and restart
+puts "Connecting to remote for build and restart..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Forcing frontend build inside container..."
+send "docker-compose -f docker-compose.prod.yml exec -T frontend npm run build\r"
+expect "#"
+
+puts "Restarting frontend container..."
+send "docker-compose -f docker-compose.prod.yml restart frontend\r"
+expect "#"
+
+puts "Cleaning up build cache..."
+send "docker system prune -f\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment and build completed successfully!"

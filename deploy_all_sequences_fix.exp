@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# Upload fix
+puts "Uploading comprehensive sequence fix..."
+spawn scp -o StrictHostKeyChecking=no fix_all_sequences.sql $user@$host:$project_path/fix_all_sequences.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# Execute
+puts "Connecting to remote..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Copying fix into container..."
+send "docker cp fix_all_sequences.sql bestkids_postgres_prod:/tmp/fix_all_sequences.sql\r"
+expect "#"
+
+puts "Executing comprehensive sequence fix..."
+send "docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -f /tmp/fix_all_sequences.sql\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "All sequences fixed successfully!"

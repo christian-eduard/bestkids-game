@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+
+// Import Vanta.js only on client side
+declare global {
+    interface Window {
+        VANTA: any;
+        THREE: any;
+    }
+}
 
 export default function BestKidsLogin() {
     const { login } = useAuth();
     const router = useRouter();
+    const vantaRef = useRef<HTMLDivElement>(null);
+    const [vantaEffect, setVantaEffect] = useState<any>(null);
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -14,6 +24,46 @@ export default function BestKidsLogin() {
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        const loadVanta = () => {
+            if (typeof window !== 'undefined' && !vantaEffect) {
+                const threeScript = document.createElement('script');
+                threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+                threeScript.onload = () => {
+                    const vantaScript = document.createElement('script');
+                    vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js';
+                    vantaScript.onload = () => {
+                        if (vantaRef.current && window.VANTA) {
+                            const effect = window.VANTA.HALO({
+                                el: vantaRef.current,
+                                mouseControls: true,
+                                touchControls: true,
+                                gyroControls: false,
+                                minHeight: 200.00,
+                                minWidth: 200.00,
+                                baseColor: 0x221a22,
+                                backgroundColor: 0x050406,
+                                amplitudeFactor: 1.50,
+                                xOffset: 0.15,
+                                yOffset: 0.00,
+                                size: 1.50
+                            });
+                            setVantaEffect(effect);
+                        }
+                    };
+                    document.head.appendChild(vantaScript);
+                };
+                document.head.appendChild(threeScript);
+            }
+        };
+
+        loadVanta();
+
+        return () => {
+            if (vantaEffect) vantaEffect.destroy();
+        };
+    }, [vantaEffect]);
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -26,27 +76,24 @@ export default function BestKidsLogin() {
 
         try {
             const user = await login(username, password);
-            // Ensure roleId is number for comparison
             const roleId = Number(user.roleId);
 
-            // Small delay to ensure localStorage is synced before navigation
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // Role-based redirection - use full page reload to ensure token is picked up
             switch (roleId) {
-                case 1: // Master Admin
+                case 1:
                     window.location.href = '/dashboard/admin';
                     break;
-                case 2: // Center Admin
+                case 2:
                     window.location.href = '/dashboard/center';
                     break;
-                case 3: // Teacher
+                case 3:
                     window.location.href = '/dashboard/teacher';
                     break;
-                case 4: // Parent
+                case 4:
                     window.location.href = '/dashboard/parent';
                     break;
-                case 5: // Student
+                case 5:
                 default:
                     window.location.href = '/dashboard';
                     break;
@@ -62,62 +109,72 @@ export default function BestKidsLogin() {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center p-2 md:p-4">
-            <main className="w-full max-w-[440px] relative z-10">
-                <div className="bg-card-light dark:bg-card-dark rounded-2xl md:rounded-3xl shadow-soft p-5 md:p-8 border border-white/50 dark:border-white/5 relative z-10 transition-all duration-300 hover:shadow-glow">
+        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+            {/* Vanta Background Container */}
+            <div ref={vantaRef} className="absolute inset-0 z-0 h-full w-full"></div>
+
+            {/* Content Mask / Backdrop blur */}
+            <div className="absolute inset-0 z-1 bg-black/10 backdrop-blur-[2px]"></div>
+
+            <main className="w-full max-w-[440px] relative z-10 px-4">
+                <div className="bg-white/10 dark:bg-black/40 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20 dark:border-white/10 relative transition-all duration-500 hover:shadow-[0_0_50px_rgba(139,92,246,0.3)] group/card">
+                    
+                    {/* Floating Background Elements */}
+                    <div className="absolute -top-12 -right-12 size-40 bg-primary/20 rounded-full blur-3xl group-hover/card:bg-primary/30 transition-all duration-700 animate-pulse"></div>
+                    <div className="absolute -bottom-12 -left-12 size-40 bg-fuchsia-500/20 rounded-full blur-3xl group-hover/card:bg-fuchsia-500/30 transition-all duration-700 animate-pulse delay-700"></div>
+
                     {/* Logo Area */}
-                    <div className="flex flex-col items-center justify-center mb-6 gap-2">
-                        <div className="size-14 bg-primary/10 rounded-2xl flex items-center justify-center rotate-3 transform transition-transform hover:rotate-6">
-                            <span className="material-symbols-outlined text-primary !text-[32px]">rocket_launch</span>
+                    <div className="flex flex-col items-center justify-center mb-8 gap-4">
+                        <div className="size-20 bg-gradient-to-br from-primary to-fuchsia-600 rounded-2xl flex items-center justify-center shadow-xl rotate-3 transform transition-all duration-500 group-hover/card:rotate-12 group-hover/card:scale-110">
+                            <span className="material-symbols-outlined text-white !text-[44px]">rocket_launch</span>
                         </div>
                         <div className="text-center">
-                            <h2 className="text-text-main dark:text-white text-3xl font-black tracking-tight leading-tight">BestKids</h2>
-                            <p className="text-text-muted dark:text-gray-400 text-sm font-medium tracking-wide uppercase mt-1">Portal de Acceso</p>
+                            <h2 className="text-white text-4xl font-black tracking-tight leading-tight drop-shadow-md">BestKids</h2>
+                            <div className="h-1 w-12 bg-primary mx-auto mt-2 rounded-full"></div>
                         </div>
                     </div>
 
-                    {/* Greeting */}
-                    <div className="text-center mb-6">
-                        <h1 className="text-text-main dark:text-white text-xl md:text-2xl font-bold mb-1">¡Hola de nuevo!</h1>
-                        <p className="text-text-muted dark:text-gray-400 text-sm">Ingresa a tu cuenta para continuar</p>
+                    {/* Form Title */}
+                    <div className="text-center mb-10">
+                        <h1 className="text-white text-2xl font-bold mb-2">¡Bienvenido al Futuro!</h1>
+                        <p className="text-white/60 text-sm font-medium">Ingresa para explorar el universo educativo</p>
                     </div>
 
                     {/* Login Form */}
-                    <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
-                        {/* Error Message */}
+                    <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
                         {error && (
-                            <div className="bg-red-50 dark:bg-red-900/20 text-red-500 text-sm font-bold px-4 py-2 rounded-xl text-center">
+                            <div className="bg-rose-500/20 border border-rose-500/30 text-rose-200 text-sm font-bold px-4 py-3 rounded-2xl text-center animate-shake">
                                 {error}
                             </div>
                         )}
 
                         {/* Username Field */}
-                        <div className="group">
-                            <label className="block text-text-main dark:text-gray-200 text-sm font-bold mb-2 pl-4" htmlFor="username">Usuario</label>
-                            <div className="relative flex items-center">
+                        <div className="space-y-2">
+                            <label className="block text-white/80 text-xs font-black uppercase tracking-widest pl-5" htmlFor="username">Usuario</label>
+                            <div className="relative group/input">
                                 <input
-                                    className="peer w-full h-14 bg-background-light dark:bg-background-dark/50 border-2 border-transparent focus:border-primary rounded-full px-5 pl-12 text-text-main dark:text-white placeholder:text-text-muted/70 font-medium focus:outline-none focus:ring-0 transition-all duration-300"
+                                    className="w-full h-15 bg-white/5 border-2 border-white/10 focus:border-primary focus:bg-white/10 rounded-full px-6 pl-14 text-white placeholder:text-white/20 font-bold focus:outline-none transition-all duration-300"
                                     id="username"
-                                    placeholder="Nombre de usuario"
+                                    placeholder="Tu nombre de usuario"
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     onKeyDown={handleKeyPress}
                                     disabled={loading}
                                 />
-                                <span className="material-symbols-outlined absolute left-4 text-text-muted peer-focus:text-primary transition-colors duration-300">person</span>
+                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within/input:text-primary transition-colors">person</span>
                             </div>
                         </div>
 
                         {/* Password Field */}
-                        <div className="group">
-                            <div className="flex justify-between items-center mb-2 px-4">
-                                <label className="block text-text-main dark:text-gray-200 text-sm font-bold" htmlFor="password">Contraseña</label>
-                                <a className="text-xs font-bold text-primary hover:text-primary-dark transition-colors" href="#">¿Olvidaste tu contraseña?</a>
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center px-5">
+                                <label className="block text-white/80 text-xs font-black uppercase tracking-widest" htmlFor="password">Contraseña</label>
+                                <a className="text-[10px] font-black text-primary hover:text-white transition-colors uppercase tracking-tighter" href="#">¿Olvidaste la clave?</a>
                             </div>
-                            <div className="relative flex items-center">
+                            <div className="relative group/input">
                                 <input
-                                    className="peer w-full h-14 bg-background-light dark:bg-background-dark/50 border-2 border-transparent focus:border-primary rounded-full px-5 pl-12 pr-12 text-text-main dark:text-white placeholder:text-text-muted/70 font-medium focus:outline-none focus:ring-0 transition-all duration-300"
+                                    className="w-full h-15 bg-white/5 border-2 border-white/10 focus:border-primary focus:bg-white/10 rounded-full px-6 pl-14 pr-14 text-white placeholder:text-white/20 font-bold focus:outline-none transition-all duration-300"
                                     id="password"
                                     placeholder="••••••••"
                                     type={showPassword ? 'text' : 'password'}
@@ -126,43 +183,43 @@ export default function BestKidsLogin() {
                                     onKeyDown={handleKeyPress}
                                     disabled={loading}
                                 />
-                                <span className="material-symbols-outlined absolute left-4 text-text-muted peer-focus:text-primary transition-colors duration-300">lock</span>
+                                <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within/input:text-primary transition-colors">lock</span>
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 text-text-muted hover:text-primary transition-colors"
+                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
                                 >
-                                    <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                                    <span className="material-symbols-outlined !text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Submit Button */}
                         <button
-                            className="mt-4 w-full h-14 bg-primary hover:bg-primary-dark text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:hover:scale-100"
+                            className="mt-4 w-full h-16 bg-gradient-to-r from-primary to-fuchsia-600 hover:from-primary-dark hover:to-fuchsia-700 text-white text-xl font-black rounded-full shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:shadow-[0_15px_40px_rgba(139,92,246,0.5)] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:scale-100"
                             type="button"
                             onClick={handleLogin}
                             disabled={loading}
                         >
-                            <span>{loading ? 'Entrando...' : 'Iniciar Sesión'}</span>
-                            {!loading && <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>}
+                            <span className="tracking-tight">{loading ? 'ESTABLECIENDO CONEXIÓN...' : 'INICIAR SESIÓN'}</span>
+                            {!loading && <span className="material-symbols-outlined font-black">arrow_forward</span>}
                         </button>
 
-                        {/* Quick Access (Dev Only) - Opens upwards */}
-                        <div className="mt-3 relative">
+                        {/* Quick Access (Dev Only) */}
+                        <div className="mt-4 relative">
                             <button
                                 type="button"
                                 onClick={() => setShowDevMenu(!showDevMenu)}
-                                className="w-full flex items-center justify-between p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 cursor-pointer font-bold text-xs text-text-muted hover:text-primary transition-colors"
+                                className="w-full flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10 cursor-pointer font-black text-[10px] text-white/40 hover:text-primary hover:bg-white/10 transition-all uppercase tracking-widest"
                             >
                                 <span className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-base">bolt</span>
-                                    Acceso Rápido (Dev)
+                                    <span className="material-symbols-outlined text-sm">bolt</span>
+                                    Acceso Rápido (Dev Mod)
                                 </span>
-                                <span className={`material-symbols-outlined text-base transition-transform duration-200 ${showDevMenu ? 'rotate-180' : ''}`}>expand_more</span>
+                                <span className={`material-symbols-outlined text-sm transition-transform duration-300 ${showDevMenu ? 'rotate-180' : ''}`}>expand_more</span>
                             </button>
                             {showDevMenu && (
-                                <div className="absolute bottom-full left-0 right-0 mb-1 p-2 grid gap-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-lg z-50 max-h-64 overflow-y-auto">
+                                <div className="absolute bottom-full left-0 right-0 mb-2 p-2 grid gap-1 bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl z-50 max-h-72 overflow-y-auto border-t-2 border-t-primary animate-in slide-in-from-bottom-4 duration-300">
                                     {['master', 'admin', 'teacher1', 'parent1', 'student1', 'student2', 'student3'].map((user) => (
                                         <button
                                             key={user}
@@ -173,44 +230,37 @@ export default function BestKidsLogin() {
                                                 try {
                                                     await login(user, 'admin123');
                                                     await new Promise(r => setTimeout(r, 100));
-
-                                                    if (user === 'master') {
-                                                        window.location.href = '/dashboard/admin';
-                                                    } else if (user === 'admin') {
-                                                        window.location.href = '/dashboard/center';
-                                                    } else if (user.includes('teacher')) {
-                                                        window.location.href = '/dashboard/teacher';
-                                                    } else if (user.includes('parent')) {
-                                                        window.location.href = '/dashboard/parent';
-                                                    } else {
-                                                        window.location.href = '/dashboard';
-                                                    }
+                                                    if (user === 'master') window.location.href = '/dashboard/admin';
+                                                    else if (user === 'admin') window.location.href = '/dashboard/center';
+                                                    else if (user.includes('teacher')) window.location.href = '/dashboard/teacher';
+                                                    else if (user.includes('parent')) window.location.href = '/dashboard/parent';
+                                                    else window.location.href = '/dashboard';
                                                 } catch (err) {
-                                                    setError('Error en acceso rápido');
+                                                    setError('Error sincronización dev');
                                                     setLoading(false);
                                                 }
                                             }}
-                                            className="flex items-center justify-between p-2 rounded-md hover:bg-primary/10 transition-all group/item"
+                                            className="flex items-center justify-between p-3 rounded-xl hover:bg-white/10 transition-all group/item"
                                         >
-                                            <div className="flex items-center gap-2">
-                                                <div className={`size-6 rounded-full flex items-center justify-center text-white font-bold text-[10px]
+                                            <div className="flex items-center gap-3">
+                                                <div className={`size-8 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg
                                                     ${user.includes('student') ? 'bg-emerald-500' :
                                                         user.includes('parent') ? 'bg-purple-500' :
                                                             user.includes('teacher') ? 'bg-blue-500' :
                                                                 user === 'master' ? 'bg-red-500' : 'bg-orange-500'}`}>
                                                     {user[0].toUpperCase()}
                                                 </div>
-                                                <span className="text-xs font-bold text-text-main dark:text-white">
+                                                <span className="text-xs font-black text-white/80 group-hover/item:text-white uppercase tracking-tight">
                                                     {user === 'master' ? 'Master Admin' :
-                                                        user === 'admin' ? 'Admin Centro' :
-                                                            user === 'teacher1' ? 'Profesor' :
-                                                                user === 'parent1' ? 'Padre' :
-                                                                    user === 'student1' ? 'Estudiante 1' :
-                                                                        user === 'student2' ? 'Estudiante 2' :
-                                                                            'Estudiante 3'}
+                                                        user === 'admin' ? 'Coordinador' :
+                                                            user === 'teacher1' ? 'Tutor/Profe' :
+                                                                user === 'parent1' ? 'Familiar' :
+                                                                    user === 'student1' ? 'Alumno 01' :
+                                                                        user === 'student2' ? 'Alumno 02' :
+                                                                            'Alumno 03'}
                                                 </span>
                                             </div>
-                                            <span className="material-symbols-outlined text-xs text-gray-300 group-hover/item:text-primary">login</span>
+                                            <span className="material-symbols-outlined text-sm text-white/20 group-hover/item:text-primary transition-colors">login</span>
                                         </button>
                                     ))}
                                 </div>
@@ -218,19 +268,27 @@ export default function BestKidsLogin() {
                         </div>
                     </form>
 
-                    {/* Footer / Sign Up */}
-                    <div className="mt-4 text-center pt-4 border-t border-gray-100 dark:border-gray-800">
-                        <p className="text-text-muted dark:text-gray-400 text-sm">
-                            ¿No tienes cuenta?
-                            <a className="text-primary font-bold hover:underline ml-1" href="/register">Regístrate aquí</a>
+                    {/* Footer */}
+                    <div className="mt-8 text-center pt-6 border-t border-white/10">
+                        <p className="text-white/40 text-[11px] font-black uppercase tracking-widest">
+                            ¿Necesitas unirte?
+                            <a className="text-primary font-black hover:text-white ml-2 transition-colors" href="/register">SOLICITAR ACCESO</a>
                         </p>
                     </div>
                 </div>
-
-                {/* Fun decorative graphics */}
-                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-yellow-300 to-orange-400 rounded-full blur-xl opacity-20 -z-10 animate-pulse"></div>
-                <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-bl from-blue-400 to-primary rounded-full blur-xl opacity-20 -z-10"></div>
             </main>
+
+            <style jsx global>{`
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+                .animate-shake {
+                    animation: shake 0.2s ease-in-out 0s 2;
+                }
+                .h-15 { height: 3.75rem; }
+            `}</style>
         </div>
     );
 }

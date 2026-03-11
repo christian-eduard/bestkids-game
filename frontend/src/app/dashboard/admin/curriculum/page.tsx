@@ -5,7 +5,7 @@ import {
     Plus, Edit, Trash2, FileQuestion, Save, BookOpen, GraduationCap,
     Settings, Layout, AlignLeft, AlertCircle, Info, Eye, Code, FormInput
 } from "lucide-react";
-import VisualExerciseForm from "@/components/admin/exercises/VisualExerciseForm";
+// import VisualExerciseForm from "@/components/admin/exercises/VisualExerciseForm";
 import { Button } from "@/components/ui/button";
 import {
     Dialog, DialogContent, DialogHeader,
@@ -455,15 +455,9 @@ export default function CurriculumPage() {
 
                             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                 {editorMode === "visual" ? (
-                                    <VisualExerciseForm
-                                        type={exType}
-                                        content={(() => { try { return JSON.parse(exJsonContent || "{}"); } catch { return {}; } })()}
-                                        answer={(() => { try { return JSON.parse(exJsonAnswer || "{}"); } catch { return {}; } })()}
-                                        onChange={(c, a) => {
-                                            setExJsonContent(JSON.stringify(c, null, 2));
-                                            setExJsonAnswer(JSON.stringify(a, null, 2));
-                                        }}
-                                    />
+                                    <div className="p-4 bg-yellow-100 text-yellow-800 rounded-xl">
+                                        Note: The Visual Exercise Form has been deprecated and unified into the main Exercises tab.
+                                    </div>
                                 ) : (
                                     <div className="space-y-6">
                                         <div>

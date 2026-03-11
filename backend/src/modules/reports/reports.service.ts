@@ -136,7 +136,7 @@ export class ReportsService {
         // Subject breakdown
         const subjectMap = new Map<string, { total: number; correct: number }>();
         attempts.forEach(attempt => {
-            const subject = attempt.exercise?.title?.split(' ')[0] || 'General';
+            const subject = attempt.exercise?.instruction?.split(' ')[0] || 'General';
             if (!subjectMap.has(subject)) {
                 subjectMap.set(subject, { total: 0, correct: 0 });
             }
@@ -421,7 +421,7 @@ export class ReportsService {
             reportData.attempts.forEach(attempt => {
                 attemptsSheet.addRow({
                     date: attempt.createdAt?.toLocaleDateString('es-ES') || 'N/A',
-                    exercise: attempt.exercise?.title || 'N/A',
+                    exercise: attempt.exercise?.instruction || 'N/A',
                     correct: attempt.isCorrect ? 'Sí' : 'No',
                     points: attempt.pointsEarned || 0,
                     time: attempt.timeSpentSeconds || 0,

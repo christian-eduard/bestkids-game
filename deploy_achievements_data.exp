@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# Upload seed
+puts "Uploading nuclear-seed.sql..."
+spawn scp -o StrictHostKeyChecking=no nuclear-seed.sql $user@$host:$project_path/nuclear-seed.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# Execute
+puts "Connecting to remote..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Copying seed into container..."
+send "docker cp nuclear-seed.sql bestkids_postgres_prod:/tmp/nuclear-seed.sql\r"
+expect "#"
+
+puts "Executing nuclear-seed.sql to populate achievements..."
+send "docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -f /tmp/nuclear-seed.sql 2>&1 | tail -50\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Achievements populated successfully!"

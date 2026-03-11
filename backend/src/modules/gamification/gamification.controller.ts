@@ -54,4 +54,10 @@ export class GamificationController {
     async selectAvatar(@Request() req: any, @Body() body: { avatarId: number }) {
         return this.gamificationService.selectAvatar(req.user.id, body.avatarId);
     }
+
+    @Post('coins') // Changed to Post for simplicity as it's an action, or Patch if updating field
+    @ApiOperation({ summary: 'Add coins to user profile' })
+    async addCoins(@Request() req: any, @Body() body: { amount: number }) {
+        return this.gamificationService.addCoins(req.user.id, body.amount);
+    }
 }

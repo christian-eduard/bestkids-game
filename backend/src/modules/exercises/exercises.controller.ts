@@ -1,199 +1,103 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
 import { ExercisesService } from './exercises.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AdaptiveLearningService } from './services/adaptive-learning.service';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('exercises')
+@ApiTags('Exercises')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('exercises')
 export class ExercisesController {
-    constructor(
-        private readonly exercisesService: ExercisesService,
-        private readonly adaptiveLearningService: AdaptiveLearningService,
-    ) { }
+    constructor(private readonly exercisesService: ExercisesService) { }
+
+    @Get('units/:worldId')
+    @ApiOperation({ summary: 'Obtener unidades de un mundo' })
+    async getUnits(@Param('worldId') worldId: string) {
+        return this.exercisesService.getUnitsByWorld(+worldId);
+    }
 
     @Get('subjects')
-    @ApiOperation({ summary: 'Get all active subject areas' })
+    @ApiOperation({ summary: 'Obtener materias/áreas de aprendizaje' })
     async getSubjects() {
-        return this.exercisesService.findAllSubjectAreas();
+        return this.exercisesService.getSubjectAreas();
     }
 
-    @Get('all')
-    @ApiOperation({ summary: 'Get all active exercises' })
-    async getAllExercises() {
-        return this.exercisesService.findAll();
-    }
-
-    @Get('subject/:id')
-    @ApiOperation({ summary: 'Get exercises by subject area' })
-    async getExercisesBySubject(@Param('id') id: string) {
-        return this.exercisesService.findBySubject(+id);
-    }
-
-    @Get('next-recommended')
-    @ApiOperation({ summary: 'Get next recommended exercise (adaptive)' })
-    async getNextRecommended(
+    @Get('unit/:unitId')
+    @ApiOperation({ summary: 'Obtener ejercicios de una unidad con dificultad adaptativa' })
+    async getExercises(
         @Request() req: any,
-        @Query('subjectAreaId') subjectAreaId: string,
-        @Query('difficulty') difficulty?: string,
+        @Param('unitId') unitId: string
     ) {
-        const completedExercises = await this.exercisesService.getCompletedExerciseIds(req.user.id);
+        return this.exercisesService.getExercisesByUnit(+unitId, req.user.userId || req.user.id);
+    }
 
-        return this.adaptiveLearningService.getNextExercise(
-            req.user.id,
-            +subjectAreaId,
-            difficulty as any || 'easy',
-            completedExercises,
+    @Post('submit')
+    @ApiOperation({ summary: 'Enviar respuesta a un ejercicio' })
+    @ApiResponse({ status: 200, description: 'Resultado de la validación y premios' })
+    async submitAnswer(
+        @Request() req: any,
+        @Body() body: { exerciseId: number; answer: any; responseTimeMs: number }
+    ) {
+        return this.exercisesService.submitAnswer(
+            req.user.userId || req.user.id,
+            body.exerciseId,
+            body.answer,
+            body.responseTimeMs
         );
     }
 
-    @Get('my-progress')
-    @ApiOperation({ summary: 'Get current user progress and RtI classification' })
-    async getMyProgress(@Request() req: any) {
-        const userId = req.user.id;
-
-        // Get all attempts
-        const attempts = await this.exercisesService.getAllAttempts(userId);
-
-        if (attempts.length === 0) {
-            return {
-                totalAttempts: 0,
-                correctAttempts: 0,
-                totalPoints: 0,
-                avgTimePerExercise: 0,
-                successRate: 0,
-                recentPerformance: [] as any[],
-            };
-        }
-
-        // Calculate stats
-        const correctAttempts = attempts.filter(a => a.isCorrect).length;
-        const totalPoints = attempts.reduce((sum, a) => sum + a.pointsEarned, 0);
-        const avgTime = attempts.reduce((sum, a) => sum + (a.timeSpentSeconds || 0), 0) / attempts.length;
-        const successRate = Math.round((correctAttempts / attempts.length) * 100);
-
-        // Get recent performance for display
-        const recentPerformance: any[] = await this.exercisesService.getRecentPerformances(userId, 10);
-
-        // Calculate RtI classification
-        const consecutiveFailures = this.calculateConsecutiveFailures(attempts);
-        const lastActivity = attempts[0]?.createdAt || new Date();
-
-        const rtiMetrics = {
-            totalExercises: attempts.length,
-            correctExercises: correctAttempts,
-            avgTimePerExercise: avgTime,
-            consecutiveFailures,
-            lastActivityDate: lastActivity,
-            weeklyProgress: 0, // TODO: Calculate from previous week
-        };
-
-        // Simple RtI classification based on success rate
-        let rtiTier: 1 | 2 | 3 = 1;
-        let tierLabel = 'Tier 1';
-        let tierColor = 'green';
-        let recommendation = 'Excelente progreso';
-
-        if (successRate < 40) {
-            rtiTier = 3;
-            tierLabel = 'Tier 3';
-            tierColor = 'red';
-            recommendation = 'Necesita intervención intensiva';
-        } else if (successRate < 60) {
-            rtiTier = 2;
-            tierLabel = 'Tier 2';
-            tierColor = 'yellow';
-            recommendation = 'Necesita apoyo adicional';
-        }
-
-        return {
-            totalAttempts: attempts.length,
-            correctAttempts,
-            totalPoints,
-            avgTimePerExercise: Math.round(avgTime),
-            successRate,
-            recentPerformance,
-            rtiClassification: {
-                tier: rtiTier,
-                tierLabel,
-                tierColor,
-                recommendation,
-            },
-        };
+    @Get('stats/:userId')
+    @ApiOperation({ summary: 'Estadísticas de ejercicio del usuario' })
+    async getUserStats(@Param('userId') userId: string) {
+        return this.exercisesService.getUserStats(+userId);
     }
 
-    private calculateConsecutiveFailures(attempts: any[]): number {
-        let consecutive = 0;
-        for (const attempt of attempts) {
-            if (!attempt.isCorrect) {
-                consecutive++;
-            } else {
-                break;
-            }
-        }
-        return consecutive;
+    // Panel Master
+    @Post('unit')
+    @ApiOperation({ summary: 'Crear nueva unidad (Master)' })
+    async createUnit(@Body() body: any) {
+        return this.exercisesService.createUnit(body);
     }
 
-    @Get(':id')
+    @Post('exercise')
+    @ApiOperation({ summary: 'Crear nuevo ejercicio (Master)' })
+    async createExercise(@Body() body: any) {
+        return this.exercisesService.createExercise(body);
+    }
 
-    @ApiOperation({ summary: 'Get exercise details (play mode)' })
+    @Get('unit/:unitId/raw')
+    @ApiOperation({ summary: 'Obtener todos los ejercicios de una unidad crudos (Master)' })
+    async getExercisesRaw(@Param('unitId') unitId: string) {
+        return this.exercisesService.getExercisesRaw(+unitId);
+    }
+
+    @Get('exercise/:id')
+    @ApiOperation({ summary: 'Obtener un ejercicio por ID' })
     async getExercise(@Param('id') id: string) {
         return this.exercisesService.findOne(+id);
     }
 
-    @Post(':id/submit')
-    @ApiOperation({ summary: 'Submit exercise answer and get adaptive feedback' })
-    async submitExercise(
-        @Request() req: any,
-        @Param('id') id: string,
-        @Body() body: { answer: any; timeSpent: number },
-    ) {
-        const result = await this.exercisesService.submitAttempt(
-            req.user.id,
-            +id,
-            body.answer,
-            body.timeSpent,
-        );
-
-        // Get adaptive recommendation if student has enough attempts
-        const recentPerformances = await this.exercisesService.getRecentPerformances(req.user.id, 5);
-
-        if (recentPerformances.length >= 5) {
-            const exercise = await this.exercisesService.findOne(+id);
-            const recommendation = await this.adaptiveLearningService.analyzePerformance(
-                req.user.id,
-                recentPerformances,
-                exercise.difficultyLevel,
-                exercise.subjectAreaId,
-            );
-
-            return {
-                ...result,
-                adaptiveRecommendation: recommendation,
-            };
-        }
-
-        return result;
+    @Put('unit/:id')
+    @ApiOperation({ summary: 'Editar unidad (Master)' })
+    async updateUnit(@Param('id') id: string, @Body() body: any) {
+        return this.exercisesService.updateUnit(+id, body);
     }
 
-    @Post()
-    @ApiOperation({ summary: 'Create new exercise' })
-    async create(@Body() body: any) {
-        return this.exercisesService.create(body);
+    @Delete('unit/:id')
+    @ApiOperation({ summary: 'Eliminar unidad (Master)' })
+    async deleteUnit(@Param('id') id: string) {
+        return this.exercisesService.deleteUnit(+id);
     }
 
-    @Patch(':id')
-    @ApiOperation({ summary: 'Update exercise' })
-    async update(@Param('id') id: string, @Body() body: any) {
-        return this.exercisesService.update(+id, body);
+    @Put('exercise/:id')
+    @ApiOperation({ summary: 'Editar ejercicio (Master)' })
+    async updateExercise(@Param('id') id: string, @Body() body: any) {
+        return this.exercisesService.updateExercise(+id, body);
     }
 
-    @Delete(':id')
-    @ApiOperation({ summary: 'Delete exercise' })
-    async remove(@Param('id') id: string) {
-        return this.exercisesService.remove(+id);
+    @Delete('exercise/:id')
+    @ApiOperation({ summary: 'Eliminar ejercicio (Master)' })
+    async deleteExercise(@Param('id') id: string) {
+        return this.exercisesService.deleteExercise(+id);
     }
 }
-

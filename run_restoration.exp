@@ -1,0 +1,47 @@
+#!/usr/bin/expect -f
+set timeout 300
+set password "k6kdDfT8"
+
+# 1. Upload base-seed.sql
+spawn scp -o StrictHostKeyChecking=no base-seed.sql root@217.154.191.3:/opt/bestkids-game/base-seed.sql
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 2. Execute Base Seed
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && cat base-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 3. Execute Demo Seed (Already on server from previous step, but re-upload to be safe if I changed it locally)
+# Actually I modified demo-seed.sql locally to fix coins, so I MUST upload it again.
+spawn scp -o StrictHostKeyChecking=no demo-seed.sql root@217.154.191.3:/opt/bestkids-game/demo-seed.sql
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 4. Execute Demo Seed
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && cat demo-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+catch wait result
+exit [lindex $result 3]

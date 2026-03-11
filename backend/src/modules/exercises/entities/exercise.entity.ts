@@ -1,88 +1,69 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-    Index,
-    ManyToOne,
-    JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm';
+import { Unit } from './unit.entity';
+import { ExerciseOption } from './exercise-option.entity';
 
 export enum ExerciseType {
-    MULTIPLE_CHOICE = 'multiple_choice',
-    DRAG_DROP = 'drag_drop',
-    MATCHING = 'matching',
-    FILL_BLANKS = 'fill_blanks',
-    SEQUENCE = 'sequence',
-    TRUE_FALSE = 'true_false',
-    MULTI_SELECT = 'multi_select',
-}
-
-export enum DifficultyLevel {
-    EASY = 'easy',
-    MEDIUM = 'medium',
-    HARD = 'hard',
+    SEÑALAR_IMAGEN = 'SEÑALAR_IMAGEN',
+    OPCION_MULTIPLE = 'OPCION_MULTIPLE',
+    VERDADERO_FALSO = 'VERDADERO_FALSO',
+    ARRASTRAR_SILABAS = 'ARRASTRAR_SILABAS',
+    UNIR_LINEAS = 'UNIR_LINEAS',
+    CLASIFICAR_GRUPOS = 'CLASIFICAR_GRUPOS',
+    PINTAR = 'PINTAR',
+    TECLADO_VIRTUAL = 'TECLADO_VIRTUAL',
+    AUDIO_SELECCION = 'AUDIO_SELECCION',
+    COMPLETAR_HUECOS = 'COMPLETAR_HUECOS'
 }
 
 @Entity('exercises')
-@Index(['subjectAreaId', 'isActive'])
-@Index(['exerciseType', 'difficultyLevel'])
 export class Exercise {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: 'subject_area_id' })
+    @Column({ name: 'subject_area_id', nullable: true })
     @Index()
     subjectAreaId: number;
 
-    @Column()
-    title: string;
+    @Column({ name: 'unit_id', nullable: true })
+    @Index()
+    unitId: number;
 
-    @Column({ type: 'text', nullable: true })
-    description: string;
+    @ManyToOne(() => Unit, (unit) => unit.exercises)
+    @JoinColumn({ name: 'unit_id' })
+    unit: Unit;
 
     @Column({
         type: 'enum',
-        enum: ExerciseType,
-        name: 'exercise_type',
+        enum: ExerciseType
     })
-    @Index()
-    exerciseType: ExerciseType;
+    type: ExerciseType;
 
-    @Column({
-        type: 'enum',
-        enum: DifficultyLevel,
-        name: 'difficulty_level',
-        default: DifficultyLevel.MEDIUM,
-    })
-    @Index()
-    difficultyLevel: DifficultyLevel;
+    @Column({ type: 'text' })
+    instruction: string; // Enunciado / Pregunta
 
-    @Column({ type: 'jsonb' })
-    content: any; // Contenido específico por tipo de ejercicio
+    @Column({ name: 'instruction_audio_url', nullable: true })
+    instructionAudioUrl: string;
 
-    @Column({ type: 'jsonb', name: 'correct_answer', nullable: true })
-    correctAnswer?: any;
+    @Column({ name: 'background_image_url', nullable: true })
+    backgroundImageUrl: string;
+
+    @Column({ name: 'background_color', nullable: true })
+    backgroundColor: string;
+
+    @Column({ type: 'int', default: 1 })
+    difficulty: number; // 1, 2, 3
 
     @Column({ type: 'int', default: 10 })
     points: number;
 
-    @Column({ type: 'int', name: 'estimated_time_minutes', nullable: true })
-    estimatedTimeMinutes: number;
+    @Column({ type: 'int', default: 0 })
+    order: number;
 
-    @Column({ type: 'jsonb', nullable: true })
-    hints: string[]; // Array de pistas
-
-    @Column({ type: 'jsonb', nullable: true })
-    tags: string[]; // Tags para búsqueda
+    @Column({ type: 'jsonb' })
+    content: any; // Estructura específica por tipo
 
     @Column({ name: 'is_active', default: true })
-    @Index()
     isActive: boolean;
-
-    @Column({ name: 'created_by' })
-    createdBy: number;
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
@@ -90,21 +71,7 @@ export class Exercise {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
 
-    // Academic Structure Relation
-    @Column({ name: 'unit_id', nullable: true })
-    @Index()
-    unitId: number;
-
-    @ManyToOne(() => require('../../courses/entities/unit.entity').Unit, (unit: any) => unit.exercises, { nullable: true })
-    @JoinColumn({ name: 'unit_id' })
-    unit?: any;
-
-    // Direct Course Relation (optional, for quick assignment)
-    @Column({ name: 'course_id', nullable: true })
-    @Index()
-    courseId: number;
-
-    @ManyToOne(() => require('../../courses/entities/course.entity').Course, { nullable: true })
-    @JoinColumn({ name: 'course_id' })
-    course?: any;
+    // Relación heredada de la versión anterior para no romper seeds/proyectos actuales si se usan
+    @OneToMany(() => ExerciseOption, (option) => option.exercise, { cascade: true })
+    options: ExerciseOption[];
 }

@@ -8,8 +8,8 @@ import { HelpCircle } from 'lucide-react';
 import { TUTORIAL_CONFIG } from '@/config/tutorials.config';
 
 const ROLE_CONFIG = {
-    1: { label: 'Administrador', color: 'text-orange-500' },
-    2: { label: 'Admin Centro', color: 'text-blue-500' },
+    1: { label: 'Master', color: 'text-red-500' },
+    2: { label: 'Administrador', color: 'text-orange-500' },
     3: { label: 'Profesor', color: 'text-cyan-500' },
     4: { label: 'Familia', color: 'text-purple-500' },
     5: { label: 'Estudiante', color: 'text-primary' },
@@ -22,10 +22,10 @@ export default function Sidebar() {
 
     let roleId = user?.roleId || 5;
 
-    // HOTFIX: Ensure main admin sees Center Dashboard as requested
-    if (user?.email === 'admin@bestkids.com') {
-        roleId = 2;
-    }
+    // HOTFIX: Removiendo forzado de roles por email para usar los de DB
+    // if (user?.email === 'admin@bestkids.com') {
+    //     roleId = 4; // Cambiado a 4 (Administrador) para consistencia si se usa
+    // }
 
     const roleConfig = ROLE_CONFIG[roleId as keyof typeof ROLE_CONFIG] || ROLE_CONFIG[5];
 
@@ -49,11 +49,11 @@ export default function Sidebar() {
         { href: '/dashboard/admin', icon: 'dashboard', label: 'Dashboard' },
         { href: '/dashboard/admin/centers', icon: 'business', label: 'Centros' },
         { href: '/dashboard/admin/users', icon: 'group', label: 'Usuarios' },
-        { href: '/dashboard/admin/curriculum', icon: 'school', label: 'Curriculum' },
-        { href: '/dashboard/admin/exercises', icon: 'extension', label: 'Ejercicios' },
+        { href: '/dashboard/master/exercises', icon: 'extension', label: 'Ejercicios' },
+        { href: '/dashboard/master/worlds', icon: 'public', label: 'Mundos' },
         { href: '/dashboard/admin/store', icon: 'shopping_bag', label: 'Tienda Master' },
         { href: '/dashboard/admin/reports', icon: 'analytics', label: 'Reportes' },
-        { href: '/dashboard/admin/resources', icon: 'folder_open', label: 'Recursos Master' },
+        { href: '/dashboard/admin/resources', icon: 'folder_open', label: 'Recursos' },
         { href: '/dashboard/admin/settings', icon: 'settings', label: 'Configuración' },
         { href: '/dashboard/admin/moderation', icon: 'shield', label: 'Moderación' },
         { href: '/dashboard/admin/backups', icon: 'backup', label: 'Backups' },
@@ -66,6 +66,7 @@ export default function Sidebar() {
         { href: '/dashboard/center', icon: 'dashboard', label: 'Inicio' },
         { href: '/dashboard/center/users', icon: 'group', label: 'Mis Usuarios' },
         { href: '/dashboard/center/classes', icon: 'school', label: 'Mis Aulas' },
+        { href: '/dashboard/center/exercises', icon: 'extension', label: 'Ejercicios' },
         { href: '/dashboard/center/profile', icon: 'business', label: 'Mi Centro' },
         { href: '/dashboard/docs', icon: 'menu_book', label: 'Documentación' },
     ];

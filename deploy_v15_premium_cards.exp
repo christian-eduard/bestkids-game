@@ -1,0 +1,41 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# 1. Upload Premium Pages
+puts "Uploading premium avatar and store pages..."
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/avatars/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/avatars/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/store/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/store/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Rebuild and Restart
+puts "Connecting to remote..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Rebuilding frontend with premium cards..."
+send "docker-compose -f docker-compose.prod.yml build frontend\r"
+expect "#"
+
+puts "Restarting frontend..."
+send "docker-compose -f docker-compose.prod.yml up -d frontend\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment Complete - Premium cards deployed!"

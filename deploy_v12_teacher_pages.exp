@@ -1,0 +1,43 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# 1. Upload Student Detail Page
+puts "Uploading student detail page..."
+spawn scp -o StrictHostKeyChecking=no "frontend/src/app/dashboard/teacher/students/\[id\]/page.tsx" $user@$host:$project_path/frontend/src/app/dashboard/teacher/students/\[id\]/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Upload Redesigned Progress Page
+puts "Uploading redesigned progress page..."
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/progress/page.tsx $user@$host:$project_path/frontend/src/app/dashboard/progress/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+# 3. Rebuild Frontend
+puts "Connecting to remote to rebuild frontend..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Rebuilding frontend container..."
+send "docker-compose -f docker-compose.prod.yml build frontend\r"
+expect "#"
+
+puts "Restarting frontend container..."
+send "docker-compose -f docker-compose.prod.yml up -d frontend\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment Complete!"

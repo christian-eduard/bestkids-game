@@ -23,7 +23,7 @@ export class GamificationService implements OnModuleInit {
         console.log('✅ Gamification Service initialized');
     }
 
-    async getProfile(userId: number) {
+    async getProfile(userId: number): Promise<GamificationProfile> {
         try {
             let profile = await this.profileRepository.findOne({
                 where: { userId },
@@ -35,9 +35,11 @@ export class GamificationService implements OnModuleInit {
                     userId,
                     totalPoints: 0,
                     currentLevel: 1,
+                    experiencePoints: 0,
                     dailyPoints: 0,
                     weeklyPoints: 0,
-                    monthlyPoints: 0
+                    monthlyPoints: 0,
+                    coins: 0
                 });
                 await this.profileRepository.save(profile);
 
@@ -51,6 +53,11 @@ export class GamificationService implements OnModuleInit {
             console.error('Error in getProfile:', error);
             throw error;
         }
+    }
+
+    async getUserXp(userId: number): Promise<number> {
+        const profile = await this.getProfile(userId);
+        return profile?.experiencePoints || 0;
     }
 
     async addPoints(userId: number, amount: number) {
@@ -241,5 +248,12 @@ export class GamificationService implements OnModuleInit {
 
     async getUserAvatars(userId: number) {
         return this.getUnlockedAvatars(userId);
+    }
+
+    async addCoins(userId: number, amount: number) {
+        const profile = await this.getProfile(userId);
+        if (!profile) throw new NotFoundException('Profile not found');
+        profile.coins += amount;
+        return this.profileRepository.save(profile);
     }
 }

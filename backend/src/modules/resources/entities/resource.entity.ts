@@ -14,6 +14,7 @@ export enum ResourceType {
     VIDEO = 'video',
     LINK = 'link',
     FILE = 'file',
+    DOCUMENTATION = 'documentation',
 }
 
 @Entity('resources')

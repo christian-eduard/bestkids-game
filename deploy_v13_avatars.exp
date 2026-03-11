@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# 1. Upload Nuclear Seed v13
+puts "Uploading nuclear-seed.sql v13 with avatars..."
+spawn scp -o StrictHostKeyChecking=no nuclear-seed.sql $user@$host:$project_path/nuclear-seed.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Execute Seed
+puts "Connecting to remote to execute seed..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Copying seed into container..."
+send "docker cp nuclear-seed.sql bestkids_postgres_prod:/tmp/nuclear-seed.sql\r"
+expect "#"
+
+puts "Executing nuclear-seed.sql v13..."
+send "docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -f /tmp/nuclear-seed.sql\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment Complete - Avatar store should now show images!"

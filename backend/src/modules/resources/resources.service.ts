@@ -63,4 +63,36 @@ export class ResourcesService {
             order: { createdAt: 'DESC' },
         });
     }
+
+    async findCategories(): Promise<string[]> {
+        const result = await this.resourceRepository
+            .createQueryBuilder('resource')
+            .select('DISTINCT resource.category', 'category')
+            .where('resource.category IS NOT NULL')
+            .andWhere("resource.category != ''")
+            .orderBy('resource.category', 'ASC')
+            .getRawMany();
+        return result.map(r => r.category);
+    }
+
+    async updateCategory(oldName: string, newName: string) {
+        await this.resourceRepository
+            .createQueryBuilder()
+            .update(Resource)
+            .set({ category: newName })
+            .where('category = :oldName', { oldName })
+            .execute();
+        return { success: true, oldName, newName };
+    }
+
+    async deleteCategory(category: string) {
+        // Set category to 'General' for all resources in this category
+        await this.resourceRepository
+            .createQueryBuilder()
+            .update(Resource)
+            .set({ category: 'General' })
+            .where('category = :category', { category })
+            .execute();
+        return { success: true };
+    }
 }

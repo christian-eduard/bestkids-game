@@ -1,10 +1,9 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { User, AcademicLevel } from '../users/entities/user.entity';
-import { Exercise, DifficultyLevel } from '../exercises/entities/exercise.entity';
-import { ExerciseAttempt } from '../progress/entities/exercise-attempt.entity';
+import { Exercise } from '../exercises/entities/exercise.entity';
+import { UserExerciseResult } from '../exercises/entities/user-exercise-result.entity';
 
 @Injectable()
 export class EvaluationsService {
@@ -13,33 +12,27 @@ export class EvaluationsService {
         private usersRepository: Repository<User>,
         @InjectRepository(Exercise)
         private exercisesRepository: Repository<Exercise>,
-        @InjectRepository(ExerciseAttempt)
-        private attemptsRepository: Repository<ExerciseAttempt>,
+        @InjectRepository(UserExerciseResult)
+        private attemptsRepository: Repository<UserExerciseResult>,
     ) { }
 
     async generatePlacementTest() {
-        // Simple logic: Get 2 easy, 2 medium, 2 hard exercises
-        // In a real app, this would be more complex or randomized from a specific 'placement' pool
-
         const easy = await this.exercisesRepository.find({
-            where: { difficultyLevel: DifficultyLevel.EASY, isActive: true },
+            where: { difficulty: 1, isActive: true },
             take: 2,
         });
 
         const medium = await this.exercisesRepository.find({
-            where: { difficultyLevel: DifficultyLevel.MEDIUM, isActive: true },
+            where: { difficulty: 2, isActive: true },
             take: 2,
         });
 
         const hard = await this.exercisesRepository.find({
-            where: { difficultyLevel: DifficultyLevel.HARD, isActive: true },
+            where: { difficulty: 3, isActive: true },
             take: 2,
         });
 
-        // If not enough exercises, just return what we have
         const testExercises = [...easy, ...medium, ...hard];
-
-        // Shuffle
         return testExercises.sort(() => Math.random() - 0.5);
     }
 
@@ -47,11 +40,9 @@ export class EvaluationsService {
         const user = await this.usersRepository.findOne({ where: { id: userId } });
         if (!user) throw new NotFoundException('User not found');
 
-        let correctCount = 0;
         let totalWeight = 0;
         let earnedWeight = 0;
 
-        // Fetch exercises to get difficulty
         const exercises = await this.exercisesRepository.find({
             where: { id: In(answers.map(a => a.exerciseId)) }
         });
@@ -60,34 +51,26 @@ export class EvaluationsService {
             const exercise = exercises.find(e => e.id === answer.exerciseId);
             if (!exercise) continue;
 
-            const weight = exercise.difficultyLevel === DifficultyLevel.HARD ? 3 :
-                exercise.difficultyLevel === DifficultyLevel.MEDIUM ? 2 : 1;
-
-            totalWeight += weight;
+            totalWeight += exercise.difficulty;
             if (answer.isCorrect) {
-                correctCount++;
-                earnedWeight += weight;
+                earnedWeight += exercise.difficulty;
             }
 
-            // Save attempt record (optional given placement test nature, but good for tracking)
             const attempt = this.attemptsRepository.create({
                 userId,
                 exerciseId: exercise.id,
                 isCorrect: answer.isCorrect,
-                pointsEarned: answer.isCorrect ? exercise.points : 0,
-                attemptNumber: 1
+                responseTimeMs: 5000 // Valor por defecto para tests
             });
             await this.attemptsRepository.save(attempt);
         }
 
         const scorePercentage = totalWeight > 0 ? (earnedWeight / totalWeight) * 100 : 0;
 
-        // Determine Level
         let newLevel = AcademicLevel.BEGINNER;
         if (scorePercentage >= 80) newLevel = AcademicLevel.ADVANCED;
         else if (scorePercentage >= 50) newLevel = AcademicLevel.INTERMEDIATE;
 
-        // Update User
         user.academicLevel = newLevel;
         user.placementTestTaken = true;
         await this.usersRepository.save(user);

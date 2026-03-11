@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+
+set timeout 300
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+
+# 1. Upload Nuclear Seed v9
+spawn scp -o StrictHostKeyChecking=no nuclear-seed.sql $user@$host:/opt/bestkids-game/nuclear-seed.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Upload Fixed Frontend Page
+spawn scp -o StrictHostKeyChecking=no frontend/src/app/dashboard/assignments/page.tsx $user@$host:/opt/bestkids-game/frontend/src/app/dashboard/assignments/page.tsx
+expect "password:"
+send "$password\r"
+expect eof
+
+# 3. Execute Seed and Rebuild Frontend (to apply route fix)
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd /opt/bestkids-game\r"
+expect "#"
+
+# Run the seed
+send "cat nuclear-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db\r"
+expect "#"
+
+# Rebuild frontend to apply the Link fix
+send "docker-compose -f docker-compose.prod.yml build frontend\r"
+expect "#"
+send "docker-compose -f docker-compose.prod.yml up -d frontend\r"
+expect "#"
+
+send "exit\r"
+expect eof

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdaptiveProgress } from './entities/adaptive-progress.entity';
-import { DifficultyLevel } from './enums/difficulty-level.enum';
 import { Exercise } from '../exercises/entities/exercise.entity';
 
 @Injectable()
@@ -20,11 +19,10 @@ export class AdaptiveAlgorithmService {
         });
 
         if (!progress) {
-            // Crear progreso inicial
             progress = this.progressRepo.create({
                 userId,
                 subjectAreaId,
-                currentLevel: DifficultyLevel.NIVEL_MEDIO,
+                currentLevel: 1, // NIVEL_MEDIO approx
                 consecutiveCorrect: 0,
                 consecutiveIncorrect: 0,
                 totalExercises: 0,
@@ -32,34 +30,26 @@ export class AdaptiveAlgorithmService {
             });
         }
 
-        // Actualizar estadísticas
         progress.totalExercises += 1;
         if (isCorrect) {
             progress.correctExercises += 1;
             progress.consecutiveCorrect += 1;
-            progress.consecutiveIncorrect = 0; // Reset contador de incorrectas
+            progress.consecutiveIncorrect = 0;
         } else {
-            progress.consecutiveCorrect = 0; // Reset contador de correctas
+            progress.consecutiveCorrect = 0;
             progress.consecutiveIncorrect += 1;
         }
 
-        // Calcular porcentaje de precisión
         progress.accuracyPercentage = (progress.correctExercises / progress.totalExercises) * 100;
 
-        // **ALGORITMO ADAPTATIVO: Cada 5 ejercicios consecutivos**
         let levelChanged = false;
-
-        // ✅ 5 correctas consecutivas → SUBE DE NIVEL
-        if (progress.consecutiveCorrect >= 5 && progress.currentLevel < DifficultyLevel.NIVEL_ALTO) {
+        if (progress.consecutiveCorrect >= 5 && progress.currentLevel < 3) {
             progress.currentLevel += 1;
-            progress.consecutiveCorrect = 0; // Reset
+            progress.consecutiveCorrect = 0;
             levelChanged = true;
-        }
-
-        // ❌ 5 incorrectas consecutivas → BAJA DE NIVEL
-        if (progress.consecutiveIncorrect >= 5 && progress.currentLevel > DifficultyLevel.NIVEL_BAJO) {
+        } else if (progress.consecutiveIncorrect >= 5 && progress.currentLevel > 1) {
             progress.currentLevel -= 1;
-            progress.consecutiveIncorrect = 0; // Reset
+            progress.consecutiveIncorrect = 0;
             levelChanged = true;
         }
 
@@ -68,33 +58,20 @@ export class AdaptiveAlgorithmService {
         return {
             currentLevel: progress.currentLevel,
             levelChanged,
-            consecutiveCorrect: progress.consecutiveCorrect,
-            consecutiveIncorrect: progress.consecutiveIncorrect,
             accuracyPercentage: progress.accuracyPercentage,
         };
     }
 
     async getRecommendedExercises(userId: number, subjectAreaId: number) {
-        const progress = await this.progressRepo.findOne({
-            where: { userId, subjectAreaId },
-        });
-
-        const targetLevel = progress?.currentLevel || DifficultyLevel.NIVEL_MEDIO;
-
-        // Obtener ejercicios directamente del repositorio (simplified)
-        // En producción, aquí se filtraría por nivel de dificultad
-        const exercises = await this.exerciseRepo.find({
-            where: { subjectAreaId },
+        // Obtenemos ejercicios de cualquier unidad para simplificar compatibilidad
+        return this.exerciseRepo.find({
             take: 10,
         });
-
-        return exercises;
     }
 
     async getStudentProgress(userId: number) {
         return this.progressRepo.find({
             where: { userId },
-            relations: ['subjectArea'],
         });
     }
 }

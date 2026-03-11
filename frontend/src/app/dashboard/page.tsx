@@ -11,6 +11,17 @@ import { AVATARS } from '@/lib/constants';
 export default function StudentDashboard() {
     const { user } = useAuth();
     const router = useRouter();
+    useEffect(() => {
+        if (user) {
+            const roleId = Number(user.roleId);
+            if (roleId === 1) router.push('/dashboard/admin');
+            else if (roleId === 2) router.push('/dashboard/center');
+            else if (roleId === 3) router.push('/dashboard/teacher');
+            else if (roleId === 4) router.push('/dashboard/parent');
+            // If roleId === 5 (Student), stay on this page
+        }
+    }, [user, router]);
+
     const [profile, setProfile] = useState<GamificationProfile | null>(null);
     // ...
 

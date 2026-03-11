@@ -5,11 +5,11 @@ import { EvaluationsService } from './evaluations.service';
 import { EvaluationsController } from './evaluations.controller';
 import { User } from '../users/entities/user.entity';
 import { Exercise } from '../exercises/entities/exercise.entity';
-import { ExerciseAttempt } from '../progress/entities/exercise-attempt.entity';
+import { UserExerciseResult } from '../exercises/entities/user-exercise-result.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User, Exercise, ExerciseAttempt]),
+        TypeOrmModule.forFeature([User, Exercise, UserExerciseResult]),
     ],
     controllers: [EvaluationsController],
     providers: [EvaluationsService],

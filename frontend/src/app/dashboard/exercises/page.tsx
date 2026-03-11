@@ -1,310 +1,294 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "@/lib/api";
-import { Loader2 } from "lucide-react";
+import { WorldsService, World } from "@/services/worlds.service";
+import { ExerciseService, Unit, Exercise, ExercisesResponse } from "@/services/exercises.service";
 import { GamificationService, GamificationProfile } from "@/services/gamification.service";
+import ExerciseEngine from "@/components/exercises/ExerciseEngine";
 
-interface Subject {
-    id: number;
-    name: string;
-    description?: string;
-    icon?: string;
-    colorHex?: string;
-}
+type ViewState = 'worlds' | 'units' | 'playing' | 'results';
 
-interface Exercise {
-    id: number;
-    title: string;
-    description?: string;
-    points: number;
-    estimatedTimeMinutes?: number;
-    difficultyLevel?: string;
-}
-
-export default function ExercisesPage() {
+export default function StudentExercisesPage() {
     const router = useRouter();
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
-    const [exercises, setExercises] = useState<Exercise[]>([]);
-    const [exercisesLoading, setExercisesLoading] = useState(false);
+
+    // Data
+    const [worlds, setWorlds] = useState<World[]>([]);
+    const [units, setUnits] = useState<Unit[]>([]);
+    const [exercisesResponse, setExercisesResponse] = useState<ExercisesResponse | null>(null);
     const [profile, setProfile] = useState<GamificationProfile | null>(null);
 
+    // Selection
+    const [selectedWorld, setSelectedWorld] = useState<World | null>(null);
+    const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
+
+    // UI
+    const [view, setView] = useState<ViewState>('worlds');
+    const [loading, setLoading] = useState(true);
+    const [results, setResults] = useState<any>(null);
+
+    // Init
     useEffect(() => {
-        fetchInitialData();
+        loadInitial();
     }, []);
 
-    const fetchInitialData = async () => {
+    const loadInitial = async () => {
         try {
-            const [subjectsRes, profileData] = await Promise.all([
-                api.get("/exercises/subjects"),
+            const [worldsData, profileData] = await Promise.all([
+                WorldsService.getWorlds(),
                 GamificationService.getProfile().catch(() => null)
             ]);
-            setSubjects(subjectsRes.data);
+            setWorlds(worldsData || []);
             setProfile(profileData);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
+        } catch (e) { console.error(e); }
+        finally { setLoading(false); }
     };
 
-    const fetchExercises = async (subjectId: number) => {
-        setSelectedSubject(subjectId);
-        setExercisesLoading(true);
+    const selectWorld = async (world: World) => {
+        setSelectedWorld(world);
+        setLoading(true);
         try {
-            const res = await api.get(`/exercises/subject/${subjectId}`);
-            setExercises(res.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setExercisesLoading(false);
-        }
+            const data = await ExerciseService.getUnitsByWorld(world.id);
+            setUnits(data || []);
+            setView('units');
+        } catch (e) { console.error(e); }
+        finally { setLoading(false); }
     };
 
-    // Material Symbols icon based on subject name
-    const getSubjectIcon = (name: string): string => {
-        const iconMap: Record<string, string> = {
-            'Mathematics': 'calculate',
-            'Matemáticas': 'calculate',
-            'Language': 'menu_book',
-            'Lengua': 'menu_book',
-            'Lenguaje': 'menu_book',
-            'Science': 'science',
-            'Ciencias': 'science',
-            'Natural Sciences': 'eco',
-            'Ciencias Naturales': 'eco',
-            'Social Studies': 'public',
-            'Estudios Sociales': 'public',
-            'Sociales': 'public',
-        };
-        return iconMap[name] || 'school';
+    const selectUnit = async (unit: Unit) => {
+        setSelectedUnit(unit);
+        setLoading(true);
+        try {
+            const data = await ExerciseService.getExercisesByUnit(unit.id);
+            setExercisesResponse(data);
+            if (data.exercises.length > 0) {
+                setView('playing');
+            }
+        } catch (e) { console.error(e); }
+        finally { setLoading(false); }
     };
 
-    // Gradients for card backgrounds (like avatar store)
-    const getGradient = (index: number) => {
-        const gradients = [
-            'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20',
-            'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20',
-            'from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20',
-            'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20',
-        ];
-        return gradients[index % gradients.length];
+    const handleFinish = (gameResults: any) => {
+        setResults(gameResults);
+        setView('results');
+        // Refresh profile for XP updates
+        GamificationService.getProfile().then(setProfile).catch(() => { });
     };
 
-    // Icon color based on subject
-    const getIconColor = (name: string): string => {
-        const colorMap: Record<string, string> = {
-            'Mathematics': 'text-emerald-600',
-            'Matemáticas': 'text-emerald-600',
-            'Language': 'text-violet-600',
-            'Lengua': 'text-violet-600',
-            'Lenguaje': 'text-violet-600',
-            'Science': 'text-cyan-600',
-            'Ciencias': 'text-cyan-600',
-            'Natural Sciences': 'text-green-600',
-            'Ciencias Naturales': 'text-green-600',
-            'Social Studies': 'text-amber-600',
-            'Estudios Sociales': 'text-amber-600',
-            'Sociales': 'text-amber-600',
-        };
-        return colorMap[name] || 'text-primary';
+    const goBack = () => {
+        if (view === 'results') { setView('worlds'); setSelectedUnit(null); setSelectedWorld(null); }
+        else if (view === 'playing') { setView('units'); setSelectedUnit(null); }
+        else if (view === 'units') { setView('worlds'); setSelectedWorld(null); }
+        else { router.back(); }
     };
 
-    const getDifficultyBadge = (level?: string) => {
-        switch (level?.toLowerCase()) {
-            case 'easy':
-            case 'fácil':
-                return 'bg-green-100 text-green-700 border-green-200';
-            case 'medium':
-            case 'medio':
-                return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-            case 'hard':
-            case 'difícil':
-                return 'bg-red-100 text-red-700 border-red-200';
-            default:
-                return 'bg-gray-100 text-gray-700 border-gray-200';
-        }
-    };
+    const API = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '');
 
-    if (loading) {
+    // ═══════════════════════════════════════════════════════════════════════
+    // Loading
+    if (loading && view === 'worlds') {
         return (
-            <div className="flex h-full items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <div className="flex h-full items-center justify-center min-h-[60vh]">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
             </div>
         );
     }
 
+    // Playing — full screen engine
+    if (view === 'playing' && exercisesResponse) {
+        return (
+            <ExerciseEngine
+                exercises={exercisesResponse.exercises}
+                unitTitle={selectedUnit?.title || 'Ejercicios'}
+                onFinish={handleFinish}
+            />
+        );
+    }
+
     return (
-        <div className="flex flex-col max-w-[1200px] mx-auto w-full gap-8 p-4 sm:p-6 lg:p-8">
-            {/* Page Heading & Stats */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-2">
-                <div className="flex flex-col gap-2">
-                    <button
-                        onClick={() => router.back()}
-                        className="w-fit flex items-center text-sm font-bold text-gray-500 hover:text-primary transition-colors mb-1"
-                    >
+        <div className="flex flex-col max-w-[1200px] mx-auto w-full gap-6 p-4 sm:p-6 lg:p-8">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-2">
+                <div className="flex flex-col gap-1">
+                    <button onClick={goBack}
+                        className="w-fit flex items-center text-sm font-bold text-gray-500 hover:text-primary transition-colors mb-1">
                         <span className="material-symbols-outlined text-lg mr-1">arrow_back</span>
-                        Volver al Inicio
+                        {view === 'units' ? 'Volver a Mundos' : 'Volver'}
                     </button>
-                    <h1 className="text-[#1c0d1c] dark:text-white text-4xl sm:text-5xl font-black leading-tight tracking-[-0.03em] drop-shadow-sm">
-                        EJERCICIOS
+                    <h1 className="text-[#1c0d1c] dark:text-white text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+                        {view === 'worlds' && 'Ejercicios'}
+                        {view === 'units' && selectedWorld?.name}
+                        {view === 'results' && 'Resultados'}
                     </h1>
-                    <p className="text-[#9c499c] dark:text-[#dcb5dc] text-lg font-medium">
-                        Elige una materia y empieza a ganar puntos
+                    <p className="text-[#9c499c] dark:text-[#dcb5dc] text-base font-medium">
+                        {view === 'worlds' && 'Elige un mundo y empieza a aprender'}
+                        {view === 'units' && `Selecciona una unidad para jugar`}
+                        {view === 'results' && 'Has completado la unidad'}
                     </p>
                 </div>
 
                 {/* XP Badge */}
                 {profile && (
-                    <div className="flex items-center self-start md:self-end bg-white dark:bg-[#321a32] p-2 pr-6 rounded-full shadow-lg shadow-purple-100 dark:shadow-none border border-purple-100 dark:border-purple-900/30">
-                        <div className="size-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shadow-inner mr-3">
+                    <div className="flex items-center self-start md:self-end bg-white dark:bg-[#321a32] p-2 pr-5 rounded-full shadow-lg border border-purple-100 dark:border-purple-900/30">
+                        <div className="size-9 bg-primary/20 rounded-full flex items-center justify-center text-primary mr-2.5">
                             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tu XP</span>
-                            <span className="text-xl font-black text-[#1c0d1c] dark:text-white leading-none">{profile.totalPoints?.toLocaleString() || 0}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tu XP</span>
+                            <span className="text-lg font-black text-[#1c0d1c] dark:text-white leading-none">{profile.totalPoints?.toLocaleString() || 0}</span>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Subject Filter Tabs */}
-            <div className="flex gap-3 flex-wrap items-center">
-                <button
-                    onClick={() => {
-                        setSelectedSubject(null);
-                        setExercises([]);
-                    }}
-                    className={`group flex h-10 items-center justify-center gap-x-2 rounded-full px-6 transition-all hover:scale-105 active:scale-95 ${selectedSubject === null
-                        ? 'bg-primary text-white shadow-md shadow-primary/25'
-                        : 'bg-white dark:bg-[#321a32] text-[#1c0d1c] dark:text-white shadow-sm border border-transparent hover:border-purple-200 dark:hover:border-purple-800'
-                        }`}
-                >
-                    <span className="text-sm font-bold">Todas las Materias</span>
-                </button>
-                {subjects.map(subject => (
-                    <button
-                        key={subject.id}
-                        onClick={() => fetchExercises(subject.id)}
-                        className={`group flex h-10 items-center justify-center gap-x-2 rounded-full px-6 transition-all hover:scale-105 active:scale-95 ${selectedSubject === subject.id
-                            ? 'bg-primary text-white shadow-md shadow-primary/25'
-                            : 'bg-white dark:bg-[#321a32] text-[#1c0d1c] dark:text-white shadow-sm border border-transparent hover:border-purple-200 dark:hover:border-purple-800'
-                            }`}
-                    >
-                        <span className={`material-symbols-outlined text-lg ${selectedSubject === subject.id ? 'text-white' : getIconColor(subject.name)}`}>
-                            {getSubjectIcon(subject.name)}
-                        </span>
-                        <span className="text-sm font-bold">{subject.name}</span>
-                    </button>
-                ))}
-            </div>
-
-            {/* Subject Cards (when no subject selected) */}
-            {selectedSubject === null && (
-                <div id="exercises-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {subjects.map((subject, index) => (
-                        <div
-                            key={subject.id}
-                            onClick={() => fetchExercises(subject.id)}
-                            className="group relative flex flex-col bg-white dark:bg-[#321a32] rounded-2xl p-4 shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-purple-100 dark:hover:border-purple-900 cursor-pointer"
-                        >
-                            {/* Icon Container */}
-                            <div className={`aspect-square w-full rounded-xl bg-gradient-to-br ${getGradient(index)} flex items-center justify-center mb-4 overflow-hidden relative`}>
-                                <span className={`material-symbols-outlined text-7xl ${getIconColor(subject.name)} transform group-hover:scale-110 transition-transform duration-300`}>
-                                    {getSubjectIcon(subject.name)}
-                                </span>
+            {/* ── WORLDS VIEW ──────────────────────────────────────── */}
+            {view === 'worlds' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {worlds.length > 0 ? worlds.map(world => (
+                        <div key={world.id} onClick={() => selectWorld(world)}
+                            className="group relative flex flex-col bg-white dark:bg-[#321a32] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-purple-100 dark:hover:border-purple-900 cursor-pointer">
+                            {/* World image */}
+                            <div className="aspect-[16/9] relative overflow-hidden bg-gradient-to-br from-purple-100 to-fuchsia-100 dark:from-purple-900/30 dark:to-fuchsia-900/30">
+                                {world.backgroundImageUrl ? (
+                                    <img
+                                        src={world.backgroundImageUrl.startsWith('/') ? `${API}${world.backgroundImageUrl}` : world.backgroundImageUrl}
+                                        alt={world.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-6xl text-purple-300 dark:text-purple-700">{world.icon || 'public'}</span>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                                <div className="absolute bottom-3 left-3">
+                                    <span className="bg-white/90 dark:bg-black/50 text-xs font-bold px-2 py-1 rounded-full text-primary backdrop-blur-sm">
+                                        <span className="material-symbols-outlined text-xs align-middle mr-0.5">school</span>
+                                        Mundo
+                                    </span>
+                                </div>
                             </div>
-
-                            {/* Subject Info */}
-                            <div className="flex flex-col gap-1">
-                                <h3 className="text-lg font-bold text-[#1c0d1c] dark:text-white leading-tight">{subject.name}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                    {subject.description || "Explora los ejercicios"}
+                            <div className="p-4">
+                                <h3 className="text-lg font-bold text-[#1c0d1c] dark:text-white">{world.name}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                    {world.description || 'Explora los ejercicios de este mundo'}
                                 </p>
-                                <button className="mt-auto w-full h-10 bg-primary hover:bg-primary-dark text-white rounded-full font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition-transform active:scale-95">
+                                <button className="mt-3 w-full h-10 bg-primary hover:bg-fuchsia-600 text-white rounded-full font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95">
                                     <span className="material-symbols-outlined text-lg">play_arrow</span>
-                                    Empezar
+                                    Explorar
                                 </button>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div className="col-span-full bg-white dark:bg-[#321a32] rounded-2xl p-12 text-center border border-purple-100 dark:border-purple-900/30">
+                            <span className="material-symbols-outlined text-5xl text-gray-300 dark:text-gray-600 mb-3 block">search_off</span>
+                            <h3 className="text-xl font-bold text-gray-500 mb-1">No hay mundos disponibles</h3>
+                            <p className="text-gray-400">Tu profesor todavia no ha creado ejercicios.</p>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Exercises List (when subject is selected) */}
-            {selectedSubject !== null && (
-                <div>
-                    {exercisesLoading ? (
+            {/* ── UNITS VIEW ────────────────────────────────────── */}
+            {view === 'units' && (
+                <>
+                    {loading ? (
                         <div className="flex justify-center py-12">
-                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
                         </div>
-                    ) : exercises.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {exercises.map((exercise, index) => (
-                                <Link key={exercise.id} href={`/dashboard/exercises/${exercise.id}`}>
-                                    <div className="group relative flex flex-col bg-white dark:bg-[#321a32] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-purple-100 dark:hover:border-purple-900 cursor-pointer h-full">
-                                        {/* Exercise Number Badge */}
-                                        <div className="absolute top-4 right-4 z-10 bg-primary text-white text-xs font-bold size-8 rounded-full flex items-center justify-center">
-                                            {index + 1}
-                                        </div>
-
-                                        {/* Difficulty Badge */}
-                                        {exercise.difficultyLevel && (
-                                            <div className={`absolute top-4 left-4 z-10 text-xs font-bold px-2 py-1 rounded-full border ${getDifficultyBadge(exercise.difficultyLevel)}`}>
-                                                {exercise.difficultyLevel}
+                    ) : units.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {units.filter(u => u.isActive).map((unit, idx) => {
+                                const exerciseCount = unit.exercises?.length || 0;
+                                return (
+                                    <div key={unit.id} onClick={() => selectUnit(unit)}
+                                        className="group flex flex-col bg-white dark:bg-[#321a32] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-purple-100 dark:hover:border-purple-900 cursor-pointer">
+                                        {/* Unit number */}
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="size-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-lg font-black">
+                                                {idx + 1}
                                             </div>
-                                        )}
-
-                                        {/* Title */}
-                                        <h3 className="text-lg font-bold text-[#1c0d1c] dark:text-white leading-tight mt-8 mb-2 pr-10">
-                                            {exercise.title}
-                                        </h3>
-
-                                        {/* Description */}
-                                        {exercise.description && (
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
-                                                {exercise.description}
-                                            </p>
-                                        )}
+                                            <div className="flex-1">
+                                                <h3 className="text-base font-bold text-[#1c0d1c] dark:text-white leading-tight">{unit.title}</h3>
+                                                {unit.description && (
+                                                    <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{unit.description}</p>
+                                                )}
+                                            </div>
+                                        </div>
 
                                         {/* Stats */}
-                                        <div className="flex gap-3 mt-auto mb-4">
-                                            <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1.5 rounded-full text-sm font-bold">
-                                                <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                {exercise.points} XP
-                                            </div>
-                                            {exercise.estimatedTimeMinutes && (
-                                                <div className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-full text-sm font-bold">
-                                                    <span className="material-symbols-outlined text-base">schedule</span>
-                                                    {exercise.estimatedTimeMinutes} min
-                                                </div>
-                                            )}
+                                        <div className="flex gap-2 mb-3">
+                                            <span className="text-[10px] font-bold bg-purple-50 dark:bg-purple-900/20 text-purple-600 px-2 py-1 rounded-full">
+                                                <span className="material-symbols-outlined text-xs align-middle mr-0.5">quiz</span>
+                                                {exerciseCount} ejercicios
+                                            </span>
+                                            <span className="text-[10px] font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-600 px-2 py-1 rounded-full">
+                                                <span className="material-symbols-outlined text-xs align-middle mr-0.5">signal_cellular_alt</span>
+                                                Nivel {unit.difficulty}
+                                            </span>
                                         </div>
 
-                                        {/* Play Button */}
-                                        <button className="w-full h-10 bg-primary hover:bg-primary-dark text-white rounded-full font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition-transform group-hover:scale-[1.02] active:scale-95">
-                                            <span className="material-symbols-outlined text-lg">play_arrow</span>
-                                            Jugar
+                                        {/* Play button */}
+                                        <button disabled={exerciseCount === 0}
+                                            className="mt-auto w-full h-9 bg-primary hover:bg-fuchsia-600 text-white rounded-full font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
+                                            <span className="material-symbols-outlined text-lg">
+                                                {exerciseCount > 0 ? 'play_arrow' : 'lock'}
+                                            </span>
+                                            {exerciseCount > 0 ? 'Jugar' : 'Sin ejercicios'}
                                         </button>
                                     </div>
-                                </Link>
-                            ))}
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="bg-white dark:bg-[#321a32] rounded-2xl p-12 text-center border border-purple-100 dark:border-purple-900/30">
-                            <div className="size-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                                <span className="material-symbols-outlined text-4xl text-gray-400">search_off</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#1c0d1c] dark:text-white mb-2">No hay ejercicios</h3>
-                            <p className="text-gray-500 dark:text-gray-400">
-                                Todavía no hay ejercicios disponibles en esta materia. ¡Pronto añadiremos más!
-                            </p>
+                            <span className="material-symbols-outlined text-5xl text-gray-300 mb-3 block">folder_off</span>
+                            <h3 className="text-xl font-bold text-gray-500 mb-1">No hay unidades</h3>
+                            <p className="text-gray-400">Este mundo todavia no tiene unidades con ejercicios.</p>
                         </div>
                     )}
+                </>
+            )}
+
+            {/* ── RESULTS VIEW ─────────────────────────────────── */}
+            {view === 'results' && results && (
+                <div className="max-w-lg mx-auto w-full">
+                    <div className="bg-white dark:bg-[#321a32] rounded-3xl p-8 text-center shadow-xl border border-purple-100 dark:border-purple-900/30">
+                        <div className="size-20 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-4xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>emoji_events</span>
+                        </div>
+                        <h2 className="text-2xl font-black text-[#1c0d1c] dark:text-white mb-2">
+                            Unidad completada
+                        </h2>
+                        <p className="text-gray-500 mb-6">
+                            {selectedUnit?.title}
+                        </p>
+
+                        <div className="grid grid-cols-3 gap-4 mb-8">
+                            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
+                                <div className="text-2xl font-black text-green-600">{results.correct || 0}</div>
+                                <div className="text-[10px] font-bold text-green-500 uppercase">Correctas</div>
+                            </div>
+                            <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3">
+                                <div className="text-2xl font-black text-red-500">{results.incorrect || 0}</div>
+                                <div className="text-[10px] font-bold text-red-400 uppercase">Falladas</div>
+                            </div>
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3">
+                                <div className="text-2xl font-black text-yellow-600">{results.xp || 0}</div>
+                                <div className="text-[10px] font-bold text-yellow-500 uppercase">XP</div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button onClick={() => { setView('units'); setSelectedUnit(null); }}
+                                className="flex-1 h-11 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl font-bold text-sm hover:bg-gray-200 transition-colors">
+                                Volver a Unidades
+                            </button>
+                            <button onClick={() => selectUnit(selectedUnit!)}
+                                className="flex-1 h-11 bg-primary text-white rounded-xl font-bold text-sm hover:bg-fuchsia-600 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95">
+                                <span className="material-symbols-outlined text-lg">replay</span>
+                                Repetir
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

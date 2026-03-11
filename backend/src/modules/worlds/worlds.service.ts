@@ -5,6 +5,7 @@ import { World } from './entities/world.entity';
 import { WorldLevel } from './entities/world-level.entity';
 import { LevelExercise } from './entities/level-exercise.entity';
 import { UserLevelProgress } from './entities/user-level-progress.entity';
+import { GamificationService } from '../gamification/gamification.service';
 
 @Injectable()
 export class WorldsService {
@@ -17,6 +18,7 @@ export class WorldsService {
         private levelExerciseRepository: Repository<LevelExercise>,
         @InjectRepository(UserLevelProgress)
         private progressRepository: Repository<UserLevelProgress>,
+        private gamificationService: GamificationService,
     ) { }
 
     // ============ WORLDS ============
@@ -66,7 +68,28 @@ export class WorldsService {
     }
 
     async deleteWorld(id: number) {
-        await this.worldRepository.delete(id);
+        await this.worldRepository.manager.transaction(async manager => {
+            // Eliminar Unidades y dependencias
+            const units = await manager.query('SELECT id FROM units WHERE world_id = $1', [id]);
+            if (units.length > 0) {
+                const unitIds = units.map((u: any) => u.id);
+                await manager.query('DELETE FROM user_exercise_results WHERE unit_id = ANY($1)', [unitIds]);
+                await manager.query('DELETE FROM exercises WHERE unit_id = ANY($1)', [unitIds]);
+                await manager.query('DELETE FROM units WHERE world_id = $1', [id]);
+            }
+
+            // Eliminar Niveles (Nuevos mapeos)
+            const levels = await manager.query('SELECT id FROM world_levels WHERE world_id = $1', [id]);
+            if (levels.length > 0) {
+                const levelIds = levels.map((l: any) => l.id);
+                await manager.query('DELETE FROM level_exercises WHERE level_id = ANY($1)', [levelIds]);
+                await manager.query('DELETE FROM user_level_progress WHERE level_id = ANY($1)', [levelIds]);
+                await manager.query('DELETE FROM world_levels WHERE world_id = $1', [id]);
+            }
+
+            // Finalmente, borrar el mundo
+            await manager.query('DELETE FROM worlds WHERE id = $1', [id]);
+        });
     }
 
     // ============ LEVELS ============
@@ -208,9 +231,7 @@ export class WorldsService {
     // ============ HELPERS ============
 
     private async getUserTotalPoints(userId: number): Promise<number> {
-        // TODO: Get from GamificationProfile
-        // For now, return mock value
-        return 0;
+        return this.gamificationService.getUserXp(userId);
     }
 
     private async calculateWorldProgress(world: World, userId: number): Promise<number> {

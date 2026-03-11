@@ -17,12 +17,9 @@ export class UsersSeeder {
         const userRepository = dataSource.getRepository(User);
         const centerRepository = dataSource.getRepository(Center);
 
-        // Check if already seeded
-        const count = await userRepository.count();
-        if (count > 10) {
-            console.log('Users already seeded. Skipping...');
-            return;
-        }
+        // Limpiar para asegurar un estado limpio sin duplicados
+        await dataSource.query('TRUNCATE TABLE users, centers CASCADE');
+        console.log('🗑️ Tablas users y centers limpiadas');
 
         const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -137,25 +134,33 @@ export class UsersSeeder {
         const createdStudents = await userRepository.save(userRepository.create(students));
         console.log(`✅ Created ${createdStudents.length} students`);
 
-        console.log('\n📊 Summary:');
-        console.log(`  - Centers: ${createdCenters.length}`);
-        console.log(`  - Teachers: ${createdTeachers.length}`);
-        console.log(`  - Parents: ${createdParents.length}`);
         // Create specific Test Users for Quick Access
         const testPassword = await bcrypt.hash('admin123', 10);
 
-        // Admin
+        // 1. MASTER (SuperAdmin)
         await userRepository.save(userRepository.create({
-            username: 'admin',
-            email: 'admin@bestkids.com',
+            username: 'master',
+            email: 'master@bestkids.com',
             passwordHash: testPassword,
-            firstName: 'Admin',
+            firstName: 'Master',
             lastName: 'System',
             roleId: ROLE_IDS.MASTER,
             isActive: true
         }));
 
-        // Teacher1
+        // 2. CENTER ADMIN (Administrador de Centro)
+        await userRepository.save(userRepository.create({
+            username: 'admin',
+            email: 'admin@bestkids.com',
+            passwordHash: testPassword,
+            firstName: 'Admin',
+            lastName: 'Centro',
+            roleId: ROLE_IDS.CENTER_ADMIN,
+            centerId: createdCenters[0].id,
+            isActive: true
+        }));
+
+        // 3. TEACHER
         await userRepository.save(userRepository.create({
             username: 'teacher1',
             email: 'teacher1@bestkids.com',
@@ -167,8 +172,8 @@ export class UsersSeeder {
             isActive: true
         }));
 
-        // Parent1
-        const parent1 = await userRepository.save(userRepository.create({
+        // 4. PARENT
+        const testParent = await userRepository.save(userRepository.create({
             username: 'parent1',
             email: 'parent1@bestkids.com',
             passwordHash: testPassword,
@@ -179,7 +184,7 @@ export class UsersSeeder {
             isActive: true
         }));
 
-        // Student1
+        // 5. STUDENT
         await userRepository.save(userRepository.create({
             username: 'student1',
             email: 'student1@bestkids.com',
@@ -187,13 +192,18 @@ export class UsersSeeder {
             firstName: 'Estudiante',
             lastName: 'Prueba',
             roleId: ROLE_IDS.STUDENT,
-            parentId: parent1.id,
+            parentId: testParent.id,
             centerId: createdCenters[0].id,
             isActive: true,
             studentCode: 'BK-TEST1'
         }));
 
-        console.log('✅ Created manual test users (admin, teacher1, parent1, student1)');
-        console.log(`\n🔑 Default password for all users: password123`);
+        console.log('✅ Created manual test users (master, admin, teacher1, parent1, student1)');
+        console.log(`\n🔑 Credenciales DEMO (password: admin123):`);
+        console.log(`  - Master: master`);
+        console.log(`  - Admin Centro: admin`);
+        console.log(`  - Profesor: teacher1`);
+        console.log(`  - Padre: parent1`);
+        console.log(`  - Estudiante: student1`);
     }
 }

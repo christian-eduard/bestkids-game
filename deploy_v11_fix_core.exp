@@ -1,0 +1,63 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# 1. Upload Nuclear Seed v11
+puts "Uploading nuclear-seed.sql..."
+spawn scp -o StrictHostKeyChecking=no nuclear-seed.sql $user@$host:$project_path/nuclear-seed.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Upload Fixed Frontend Components/Pages
+set files {
+    "frontend/src/app/dashboard/worlds/\[id\]/page.tsx"
+    "frontend/src/components/exercises/MultipleChoiceExercise.tsx"
+    "frontend/src/components/exercises/TrueFalseExercise.tsx"
+    "frontend/src/components/exercises/MatchingExercise.tsx"
+    "frontend/src/components/exercises/DragDropExercise.tsx"
+    "frontend/src/components/exercises/FillBlanksExercise.tsx"
+    "frontend/src/components/exercises/MultiSelectExercise.tsx"
+    "frontend/src/components/exercises/SequenceExercise.tsx"
+    "frontend/src/components/exercises/ExercisePlayer.tsx"
+}
+
+foreach file $files {
+    puts "Uploading $file..."
+    spawn scp -o StrictHostKeyChecking=no $file $user@$host:$project_path/$file
+    expect "password:"
+    send "$password\r"
+    expect eof
+}
+
+# 3. Execute Seed and Rebuild Frontend
+puts "Connecting to remote to execute seed and rebuild..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+# Run the nuclear seed
+puts "Running nuclear-seed.sql on production database..."
+send "cat nuclear-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db\r"
+expect "#"
+
+# Rebuild frontend
+puts "Rebuilding frontend container..."
+send "docker-compose -f docker-compose.prod.yml build frontend\r"
+expect "#"
+
+puts "Restarting frontend container..."
+send "docker-compose -f docker-compose.prod.yml up -d frontend\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment Complete!"

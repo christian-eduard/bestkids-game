@@ -28,13 +28,14 @@ import { AdminModule } from './modules/admin/admin.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ResourcesModule } from './modules/resources/resources.module';
+import { MediaModule } from './modules/media/media.module';
 
 @Module({
   imports: [
     // Configuration module
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../.env',
+      envFilePath: ['.env', '../.env'],
     }),
 
     // TypeORM configuration - PostgreSQL
@@ -43,11 +44,11 @@ import { ResourcesModule } from './modules/resources/resources.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST') || 'localhost',
-        port: parseInt(configService.get<string>('DB_PORT') || '5432'),
-        username: configService.get<string>('DB_USERNAME') || 'cex',
-        password: configService.get<string>('DB_PASSWORD') || '',
-        database: configService.get<string>('DB_DATABASE') || 'bestkids_db',
+        host: configService.get<string>('DATABASE_HOST') || 'localhost',
+        port: parseInt(configService.get<string>('DATABASE_PORT') || '5432'),
+        username: configService.get<string>('DATABASE_USER') || 'bestkids_user',
+        password: configService.get<string>('DATABASE_PASSWORD') || 'bestkids_password_2024',
+        database: configService.get<string>('DATABASE_NAME') || 'bestkids_db',
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true, // Auto-create tables (Dev only)
         logging: true,
@@ -82,6 +83,7 @@ import { ResourcesModule } from './modules/resources/resources.module';
     ReportsModule,
     FeedbackModule,
     ResourcesModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# Upload fix
+puts "Uploading store images fix..."
+spawn scp -o StrictHostKeyChecking=no fix_store_images.sql $user@$host:$project_path/fix_store_images.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# Execute
+puts "Connecting to remote..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Copying fix into container..."
+send "docker cp fix_store_images.sql bestkids_postgres_prod:/tmp/fix_store_images.sql\r"
+expect "#"
+
+puts "Executing store images fix..."
+send "docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -f /tmp/fix_store_images.sql\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Store images fixed successfully!"

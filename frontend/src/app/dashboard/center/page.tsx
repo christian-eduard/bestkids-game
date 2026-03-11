@@ -8,7 +8,19 @@ import { CreateTeacherModal, CreateStudentModal, CreateClassModal } from "@/comp
 import { useTutorial } from "@/contexts/TutorialContext";
 import { cn } from "@/lib/utils";
 
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+
 export default function CenterDashboardPage() {
+    const { user } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user && Number(user.roleId) === 1) {
+            router.push('/dashboard/admin');
+        }
+    }, [user, router]);
+
     const [stats, setStats] = useState<any>(null);
     const [teachers, setTeachers] = useState<any[]>([]);
     const [students, setStudents] = useState<any[]>([]);

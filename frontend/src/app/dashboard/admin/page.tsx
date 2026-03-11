@@ -13,7 +13,19 @@ import {
 } from "lucide-react";
 import { useTutorial } from "@/contexts/TutorialContext";
 
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+
 export default function AdminDashboardPage() {
+    const { user } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user && Number(user.roleId) === 2) {
+            router.push('/dashboard/center');
+        }
+    }, [user, router]);
+
     const [stats, setStats] = useState<any>(null);
     const [centers, setCenters] = useState<any[]>([]);
     const [avatars, setAvatars] = useState<any[]>([]);

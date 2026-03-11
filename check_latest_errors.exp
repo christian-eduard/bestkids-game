@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host "docker logs bestkids_backend_prod --tail 200 | grep -A 15 'POST /admin/centers\\|POST /api/users\\|POST /api/courses\\|Error creating\\|QueryFailedError'"
+expect "password:"
+send "$password\r"
+expect eof

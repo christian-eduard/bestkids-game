@@ -1,0 +1,32 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+set project_path "/opt/bestkids-game"
+
+# 1. Upload Backend Fix
+puts "Uploading admin.service.ts with error handling..."
+spawn scp -o StrictHostKeyChecking=no backend/src/modules/admin/admin.service.ts $user@$host:$project_path/backend/src/modules/admin/admin.service.ts
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Execute
+puts "Connecting to remote..."
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$password\r"
+expect "#"
+
+send "cd $project_path\r"
+expect "#"
+
+puts "Restarting backend..."
+send "docker-compose -f docker-compose.prod.yml restart backend\r"
+expect "#"
+
+send "exit\r"
+expect eof
+puts "Deployment Complete - Backend error handling improved!"

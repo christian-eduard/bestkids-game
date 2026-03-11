@@ -6,6 +6,7 @@ import { World } from './entities/world.entity';
 import { WorldLevel } from './entities/world-level.entity';
 import { LevelExercise } from './entities/level-exercise.entity';
 import { UserLevelProgress } from './entities/user-level-progress.entity';
+import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { UserLevelProgress } from './entities/user-level-progress.entity';
             LevelExercise,
             UserLevelProgress,
         ]),
+        GamificationModule,
     ],
     controllers: [WorldsController],
     providers: [WorldsService],

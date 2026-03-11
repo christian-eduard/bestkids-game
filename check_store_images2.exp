@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set password "k6kdDfT8"
+set host "217.154.191.3"
+set user "root"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host "docker-compose -f /opt/bestkids-game/docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -c 'SELECT id, name, \\\"imageUrl\\\" FROM store_items ORDER BY id'"
+expect "password:"
+send "$password\r"
+expect eof
