@@ -1,0 +1,14 @@
+#!/usr/bin/expect -f
+set timeout 300
+set password "k6kdDfT8"
+
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && docker-compose -f docker-compose.prod.yml up -d backend && sleep 15 && cat demo-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+catch wait result
+exit [lindex $result 3]

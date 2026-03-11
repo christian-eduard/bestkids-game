@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduQuest - Login</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f425f4",
+                        "primary-dark": "#d415d4",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#221022",
+                        "card-light": "#ffffff",
+                        "card-dark": "#2d1b2d",
+                        "text-main": "#1c0d1c",
+                        "text-muted": "#9c499c",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(244, 37, 244, 0.15)',
+                        'glow': '0 0 20px rgba(244, 37, 244, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e8cee8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f425f4;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex items-center justify-center p-4 relative overflow-hidden transition-colors duration-300">
+<!-- Decorative Background Elements -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[100px]"></div>
+<!-- Floating Abstract Shapes -->
+<div class="absolute top-[10%] right-[15%] w-16 h-16 bg-white dark:bg-white/5 rounded-2xl rotate-12 shadow-sm animate-pulse opacity-60"></div>
+<div class="absolute bottom-[20%] left-[10%] w-12 h-12 bg-primary/10 rounded-full shadow-sm animate-bounce duration-[3000ms] opacity-60"></div>
+</div>
+<!-- Main Card Container -->
+<main class="w-full max-w-[480px] perspective-1000">
+<div class="bg-card-light dark:bg-card-dark rounded-[2.5rem] shadow-soft p-8 md:p-12 border border-white/50 dark:border-white/5 relative z-10 transition-all duration-300 hover:shadow-glow">
+<!-- Logo Area -->
+<div class="flex flex-col items-center justify-center mb-8 gap-3">
+<div class="size-16 bg-primary/10 rounded-2xl flex items-center justify-center rotate-3 transform transition-transform hover:rotate-6">
+<span class="material-symbols-outlined text-primary !text-[40px]">rocket_launch</span>
+</div>
+<div class="text-center">
+<h2 class="text-text-main dark:text-white text-3xl font-black tracking-tight leading-tight">EduQuest</h2>
+<p class="text-text-muted dark:text-gray-400 text-sm font-medium tracking-wide uppercase mt-1">Student Portal</p>
+</div>
+</div>
+<!-- Greeting -->
+<div class="text-center mb-8">
+<h1 class="text-text-main dark:text-white text-2xl font-bold mb-2">Welcome Back, Explorer!</h1>
+<p class="text-text-muted dark:text-gray-400">Ready to unlock your next achievement?</p>
+</div>
+<!-- Login Form -->
+<form class="flex flex-col gap-5">
+<!-- Username Field -->
+<div class="group">
+<label class="block text-text-main dark:text-gray-200 text-sm font-bold mb-2 pl-4" for="username">Username</label>
+<div class="relative flex items-center">
+<input class="peer w-full h-14 bg-background-light dark:bg-background-dark/50 border-2 border-transparent focus:border-primary rounded-full px-5 pl-12 text-text-main dark:text-white placeholder:text-text-muted/70 font-medium focus:outline-none focus:ring-0 transition-all duration-300" id="username" placeholder="Type your hero name..." type="text"/>
+<span class="material-symbols-outlined absolute left-4 text-text-muted peer-focus:text-primary transition-colors duration-300">person</span>
+</div>
+</div>
+<!-- Password Field -->
+<div class="group">
+<div class="flex justify-between items-center mb-2 px-4">
+<label class="block text-text-main dark:text-gray-200 text-sm font-bold" for="password">Password</label>
+<a class="text-xs font-bold text-primary hover:text-primary-dark transition-colors" href="#">Lost your key?</a>
+</div>
+<div class="relative flex items-center">
+<input class="peer w-full h-14 bg-background-light dark:bg-background-dark/50 border-2 border-transparent focus:border-primary rounded-full px-5 pl-12 text-text-main dark:text-white placeholder:text-text-muted/70 font-medium focus:outline-none focus:ring-0 transition-all duration-300" id="password" placeholder="Your secret code" type="password"/>
+<span class="material-symbols-outlined absolute left-4 text-text-muted peer-focus:text-primary transition-colors duration-300">lock</span>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="mt-4 w-full h-14 bg-primary hover:bg-primary-dark text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group" type="button">
+<span>Start Adventure</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<!-- Footer / Sign Up -->
+<div class="mt-8 text-center pt-6 border-t border-gray-100 dark:border-gray-800">
+<p class="text-text-muted dark:text-gray-400 text-sm">
+                    New to the squad? 
+                    <a class="text-primary font-bold hover:underline ml-1" href="#">Create Account</a>
+</p>
+</div>
+</div>
+<!-- Fun decorative graphic on the side/bottom (abstract) -->
+<div class="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-yellow-300 to-orange-400 rounded-full blur-xl opacity-20 -z-10 animate-pulse"></div>
+<div class="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-bl from-blue-400 to-primary rounded-full blur-xl opacity-20 -z-10"></div>
+</main>
+</body></html>

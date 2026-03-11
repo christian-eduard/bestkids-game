@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduQuest - Dashboard Estudiante</title>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#f425f4",
+                "primary-dark": "#c91dc9",
+                "background-light": "#fcf8fc",
+                "background-dark": "#1a0b1a",
+                "card-light": "#ffffff",
+                "card-dark": "#2d1b2d",
+                },
+                fontFamily: {
+                "display": ["Spline Sans", "sans-serif"],
+                "body": ["Noto Sans", "sans-serif"],
+                },
+                borderRadius: {
+                    "DEFAULT": "1rem", 
+                    "lg": "1.5rem", 
+                    "xl": "2rem", 
+                    "2xl": "2.5rem",
+                    "full": "9999px"
+                },
+            },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e0cce0; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1b3d1; 
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4a2c4a;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#1c0d1c] dark:text-[#f3eef3] transition-colors duration-300 h-screen flex overflow-hidden selection:bg-primary/30">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col w-72 bg-card-light dark:bg-card-dark border-r border-[#f4e7f4] dark:border-[#3d253d] h-full flex-shrink-0 transition-colors duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-center bg-no-repeat bg-cover rounded-xl size-10 shadow-sm" data-alt="Abstract colorful geometric shape representing education logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDvhmmqX6VgGTVLie98HiW-BQOV9Ts6juqei8HLVS0-hQl-XZAxhczw1hLjw8ydG5e0sSn4ONid5YTLL3E6lEsPmsnl3_rT8pJQCNBcemMk3GPBSbyGoHMO2ZBNLt5gIKtRUyt95iL-AcWxNI3bjzWdjX-Uf7Y5ZFAbSBKt9Re0BFIndU8fLNBlXF0cq8Hau0ap-snLkJtt9KVbwg7o7PvrKJueaH4FlU4Rr7zlRdbG9jv1vHcN0fFIBa3CjAa_t-Ck5s1VvqV-910");'></div>
+<div class="flex flex-col">
+<h1 class="text-[#1c0d1c] dark:text-white text-xl font-bold leading-tight tracking-tight">EduQuest</h1>
+<p class="text-primary text-xs font-semibold uppercase tracking-wider">Estudiante</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-2 flex flex-col gap-2 overflow-y-auto">
+<a class="flex items-center gap-4 px-4 py-3 rounded-full bg-primary/10 text-primary group transition-all duration-200" href="#">
+<span class="material-symbols-outlined filled-icon" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-base font-bold">Inicio</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-[#6b4c6b] dark:text-[#d1bdd1] hover:bg-[#f8f0f8] dark:hover:bg-[#3d253d] hover:text-primary transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">map</span>
+<span class="text-base font-medium">Mundos</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-[#6b4c6b] dark:text-[#d1bdd1] hover:bg-[#f8f0f8] dark:hover:bg-[#3d253d] hover:text-primary transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">storefront</span>
+<span class="text-base font-medium">Tienda</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-[#6b4c6b] dark:text-[#d1bdd1] hover:bg-[#f8f0f8] dark:hover:bg-[#3d253d] hover:text-primary transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">emoji_events</span>
+<span class="text-base font-medium">Logros</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-[#6b4c6b] dark:text-[#d1bdd1] hover:bg-[#f8f0f8] dark:hover:bg-[#3d253d] hover:text-primary transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span>
+<span class="text-base font-medium">Ajustes</span>
+</a>
+</nav>
+<div class="p-6">
+<div class="bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/10 dark:to-transparent rounded-2xl p-4 mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-xl">school</span>
+<span class="text-sm font-bold text-primary dark:text-primary-light">Tarea Diaria</span>
+</div>
+<p class="text-xs text-[#6b4c6b] dark:text-[#d1bdd1] mb-2">Completa 2 lecciones de Matemáticas</p>
+<div class="w-full bg-white dark:bg-black/20 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full rounded-full w-1/2"></div>
+</div>
+</div>
+<button class="flex w-full items-center justify-center gap-2 rounded-full h-12 px-6 border-2 border-[#f4e7f4] dark:border-[#3d253d] hover:border-primary/50 text-[#6b4c6b] dark:text-[#d1bdd1] hover:text-primary text-sm font-bold transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span>Cerrar Sesión</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto h-full relative w-full">
+<!-- Mobile Header (Visible only on small screens) -->
+<header class="lg:hidden flex items-center justify-between p-4 sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="flex items-center gap-2">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-8" data-alt="EduQuest Logo Icon" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBOo7d2ndHqvovt17mkoWD9MsRE9IVZoM6DawZqQrwLO8wxkaMmIFZsj1N275i8fviAH4GIovh0yrOv0V3e4U3hk_JzVlFBvSd3jhXtgnZLEeVM3i-uV-dEPYaXvZHg0murjYVlLGd1tkPH8toRRrUlHaoyAWfWHh6e8JVADooHO0M2pRqzj5cvZ3eQ8TW4qQYDkWaut8d0LMtNZLxhi7ISlPH23bKFMNDt8siYuEWcKQD45x-qwS6zO6J3pPr9o_-J6vgBEeXs8Ek");'></div>
+<span class="font-bold text-lg">EduQuest</span>
+</div>
+<button class="p-2 rounded-full bg-white dark:bg-card-dark shadow-sm">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<div class="max-w-6xl mx-auto p-4 md:p-8 flex flex-col gap-8 pb-20">
+<!-- Profile Header Section -->
+<section class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between bg-card-light dark:bg-card-dark p-6 md:p-8 rounded-2xl shadow-sm border border-transparent dark:border-[#3d253d]">
+<div class="flex items-center gap-6">
+<div class="relative group cursor-pointer">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-20 md:size-24 ring-4 ring-primary/20 group-hover:ring-primary transition-all duration-300" data-alt="3D cartoon avatar of a young student smiling with glasses" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCM67HQOEd7nkYkWPhrSSMHxTMiE1qAPUtrH78i9u5bPfuyBrvcFvTMFcTfhPg3zQiAM9A_yssZ5yEsnSJWafkhDQjPNT5ocp6w9XdaYrDPO5L1Dp46xVdMPi5sAbyfLF9PY2OM4hKvVx1lJGw6WKOKBuKlZMJ-UVbq5jSyqQ0Hfi2zu1ZVGctiUBY48CspCIEPNBwzXRQCB9lzD8-Kt8GYMvnVc0QhJNxLdevk9t5xdMG6ZrXeiD98Qo9Yy72K19f-RcStjjhixnQ");'>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white dark:border-card-dark">
+                            Lvl 5
+                        </div>
+</div>
+<div class="flex flex-col justify-center">
+<h2 class="text-[#1c0d1c] dark:text-white text-2xl md:text-3xl font-bold leading-tight">¡Hola, Mateo! 🚀</h2>
+<p class="text-[#6b4c6b] dark:text-[#d1bdd1] text-base font-medium mt-1">Explorador Nivel 5 • ¡Estás en una racha increíble!</p>
+<div class="mt-3 flex items-center gap-3">
+<div class="w-32 md:w-48 bg-[#f4e7f4] dark:bg-[#3d253d] rounded-full h-2.5 overflow-hidden">
+<div class="bg-gradient-to-r from-primary to-purple-500 h-full rounded-full w-[75%] animate-pulse"></div>
+</div>
+<span class="text-xs font-bold text-primary">300 XP para Nivel 6</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none flex items-center justify-center gap-2 h-10 px-5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary font-bold text-sm transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                        Editar Perfil
+                    </button>
+</div>
+</section>
+<!-- Stats Row -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Streak Card -->
+<div class="flex items-center p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-transparent dark:border-[#3d253d] hover:-translate-y-1 transition-transform duration-300 cursor-default">
+<div class="size-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mr-4">
+<span class="material-symbols-outlined text-[32px] filled-icon" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div>
+<p class="text-[#6b4c6b] dark:text-[#d1bdd1] text-sm font-medium">Racha Diaria</p>
+<div class="flex items-baseline gap-2">
+<p class="text-[#1c0d1c] dark:text-white text-2xl font-bold">12 Días</p>
+<span class="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">+1</span>
+</div>
+</div>
+</div>
+<!-- Points Card -->
+<div class="flex items-center p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-transparent dark:border-[#3d253d] hover:-translate-y-1 transition-transform duration-300 cursor-default">
+<div class="size-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 mr-4">
+<span class="material-symbols-outlined text-[32px] filled-icon" style="font-variation-settings: 'FILL' 1;">diamond</span>
+</div>
+<div>
+<p class="text-[#6b4c6b] dark:text-[#d1bdd1] text-sm font-medium">Gemas Totales</p>
+<div class="flex items-baseline gap-2">
+<p class="text-[#1c0d1c] dark:text-white text-2xl font-bold">4,520</p>
+<span class="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">+150</span>
+</div>
+</div>
+</div>
+<!-- Level Card -->
+<div class="flex items-center p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-transparent dark:border-[#3d253d] hover:-translate-y-1 transition-transform duration-300 cursor-default">
+<div class="size-14 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-primary mr-4">
+<span class="material-symbols-outlined text-[32px] filled-icon" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<div>
+<p class="text-[#6b4c6b] dark:text-[#d1bdd1] text-sm font-medium">Rango Actual</p>
+<p class="text-[#1c0d1c] dark:text-white text-2xl font-bold">Explorador V</p>
+</div>
+</div>
+</section>
+<!-- Main Adventure Card (Hero) -->
+<section>
+<div class="flex items-center justify-between mb-4 px-2">
+<h2 class="text-[#1c0d1c] dark:text-white text-2xl font-bold">Tu Aventura</h2>
+<a class="text-primary text-sm font-bold hover:underline" href="#">Ver mapa completo</a>
+</div>
+<div class="group relative overflow-hidden bg-card-light dark:bg-card-dark rounded-2xl md:rounded-[2rem] shadow-sm border border-transparent dark:border-[#3d253d]">
+<div class="flex flex-col md:flex-row">
+<!-- Image Side -->
+<div class="w-full md:w-2/5 h-48 md:h-auto bg-[#f0f0f0] relative overflow-hidden">
+<div class="absolute inset-0 bg-center bg-cover transition-transform duration-700 group-hover:scale-105" data-alt="Colorful illustration of a magical cave with glowing numbers floating in the air" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCMSTxwSes7T8Y5nF4Tw2qLokqyQokQRBQ2n-H-mVp4Cc1Tg50qlHb_PLt6a1Av3H66CjGWryRdW9fEokA548jSkTFuJUPr2CHK-jilkRxYIn4cd91JWlphIBwAjo5NrBLs4f6yb1BEcwGllKUJkQGqZNdEcd5PJQwDfl-FmTIgkB2u0heWxz8maDiDLVEvZ24YOJnguArxRytFvVZKyoi-PdAe7MEpIMG9HVgoPr0YuHQ1BqjYmR2Xvl3SkSPp1D1wImeOWMcoAFQ");'>
+</div>
+<div class="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#1c0d1c] dark:text-white border border-white/20">
+                                EN PROGRESO
+                            </div>
+</div>
+<!-- Content Side -->
+<div class="flex-1 p-6 md:p-8 flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-2 text-primary font-bold text-sm uppercase tracking-wide">
+<span class="material-symbols-outlined text-lg">calculate</span>
+<span>Matemáticas</span>
+</div>
+<h3 class="text-2xl md:text-3xl font-bold text-[#1c0d1c] dark:text-white mb-2 leading-tight">La Cueva de los Números</h3>
+<div class="flex flex-col gap-1 mb-6">
+<p class="text-[#6b4c6b] dark:text-[#d1bdd1] font-medium">Capítulo 3 - Lección 2: Sumas Mágicas</p>
+<p class="text-sm text-[#9c829c] dark:text-[#a08ca0]">Ayuda a los guardianes de la cueva a resolver los acertijos numéricos para abrir la puerta del tesoro.</p>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between mt-auto">
+<div class="w-full sm:w-1/2">
+<div class="flex justify-between text-xs font-bold mb-1.5">
+<span class="text-[#6b4c6b] dark:text-[#d1bdd1]">Progreso del Capítulo</span>
+<span class="text-primary">45%</span>
+</div>
+<div class="w-full bg-[#f4e7f4] dark:bg-[#3d253d] rounded-full h-2">
+<div class="bg-primary h-full rounded-full w-[45%]"></div>
+</div>
+</div>
+<button class="w-full sm:w-auto cursor-pointer shadow-[0_4px_14px_0_rgba(244,37,244,0.39)] hover:shadow-[0_6px_20px_rgba(244,37,244,0.23)] hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 rounded-full h-12 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold">
+<span class="material-symbols-outlined filled-icon">play_arrow</span>
+                                    Jugar Ahora
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Actions Grid -->
+<section>
+<h2 class="text-[#1c0d1c] dark:text-white text-2xl font-bold mb-4 px-2">Explorar más</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- World Card -->
+<a class="group flex flex-col bg-card-light dark:bg-card-dark p-4 rounded-2xl shadow-sm border border-transparent dark:border-[#3d253d] hover:border-primary/30 transition-all duration-300 hover:-translate-y-1" href="#">
+<div class="h-32 rounded-xl bg-cover bg-center mb-4 group-hover:brightness-110 transition-all" data-alt="Illustration of a fantasy map with different islands" data-location="Mundos" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAjSSRUQXpYtDOGsLvCSd9dpprd9eupxKunUAfyC0YMMGFBerDRJouric-2GyIJeMkwceaJeDmUHoLaIEPabdx8ETKdKooNwzQSYimOY6-zzehbHANjEVK9pDfwzwnhbRCdGIBYJ0_z_0PwtSOcz8cmzstK9PPRoqWpcrM3bJ3Voh0-F-rjdFGDKGN-UWAV9_KKD5-GQ-t3lLjun3wG_FSrGvPjHsOf3b_24KSIraDRZ-hb6v7C19wbSj4e60JXZhvSs7wExemfUC4");'>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-lg text-[#1c0d1c] dark:text-white">Mundos</h3>
+<p class="text-xs text-[#6b4c6b] dark:text-[#d1bdd1]">Explora nuevos temas</p>
+</div>
+<div class="size-8 rounded-full bg-[#f4e7f4] dark:bg-[#3d253d] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</div>
+</div>
+</a>
+<!-- Achievements Card -->
+<a class="group flex flex-col bg-card-light dark:bg-card-dark p-4 rounded-2xl shadow-sm border border-transparent dark:border-[#3d253d] hover:border-primary/30 transition-all duration-300 hover:-translate-y-1" href="#">
+<div class="h-32 rounded-xl bg-cover bg-center mb-4 group-hover:brightness-110 transition-all" data-alt="Golden trophy cup illustration" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuADl8Ev0KTiW2fJpTdkt6reXJrzZ9r1_5vWN0Z4euQ7fLCqHKdpAN-F8hT3av6Ak-2R9RvX_HiOaxiatz89tkiA_rqDUvaVjWvK6S5pldWFSw4ci1rNUl3at_7JeWjz0irPUhaa4xL_sSAc4q3xz7Hi6NGgajP1otlytcu51i7W40e7-fneMAKbLTnpo7CHtL21-KZZczawfF32Y6oFbkAmAmlSbDz5aVYVLmobdEheTWIW_jS7UKfIRSbhp5OObV3axzdJIJwz93A");'>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-lg text-[#1c0d1c] dark:text-white">Mis Logros</h3>
+<p class="text-xs text-[#6b4c6b] dark:text-[#d1bdd1]">12 Desbloqueados</p>
+</div>
+<div class="size-8 rounded-full bg-[#f4e7f4] dark:bg-[#3d253d] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</div>
+</div>
+</a>
+<!-- Store Card -->
+<a class="group flex flex-col bg-card-light dark:bg-card-dark p-4 rounded-2xl shadow-sm border border-transparent dark:border-[#3d253d] hover:border-primary/30 transition-all duration-300 hover:-translate-y-1" href="#">
+<div class="h-32 rounded-xl bg-cover bg-center mb-4 group-hover:brightness-110 transition-all" data-alt="Illustration of a shop with colorful items" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDY__2Zc6d8mHMaXB-IgL3DjFMb15zOOEJ9gGl0Aqvw4QNDz_5300S8UWJOhMVm_OYpYH0s-WCpF4Mr-3SmSNLDeVxNjKQFZx0GniveeLNB9z7Ni-YVWcHMdYXL5CVlh-kUsAq9fhr2TR5C3agcUvdyVx3wNvV003CJBbNQjATwI2MLwFABZQ0MBkmXWtvCi4U5HSHuP-ijmXIYf_Hm6JiDLwipxdXaQbv_V3d16cY8e3bj43soDtejA4Ll8XAmoIIxPKRiZ6q-xps");'>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-bold text-lg text-[#1c0d1c] dark:text-white">Tienda</h3>
+<p class="text-xs text-[#6b4c6b] dark:text-[#d1bdd1]">Gasta tus gemas</p>
+</div>
+<div class="size-8 rounded-full bg-[#f4e7f4] dark:bg-[#3d253d] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</div>
+</div>
+</a>
+<!-- Daily Challenge -->
+<a class="group flex flex-col bg-gradient-to-br from-primary to-purple-600 p-4 rounded-2xl shadow-md border border-transparent transition-all duration-300 hover:-translate-y-1" href="#">
+<div class="h-32 rounded-xl flex items-center justify-center mb-4 bg-white/10 group-hover:bg-white/20 transition-all border border-white/20">
+<span class="material-symbols-outlined text-white text-[64px] animate-bounce">bolt</span>
+</div>
+<div class="flex items-center justify-between text-white">
+<div>
+<h3 class="font-bold text-lg">Desafío Diario</h3>
+<p class="text-xs text-white/80">Tiempo restante: 2h</p>
+</div>
+<div class="size-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">play_arrow</span>
+</div>
+</div>
+</a>
+</div>
+</section>
+</div>
+</main>
+</body></html>

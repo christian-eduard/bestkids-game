@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bestkids_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bestkids_db
+      POSTGRES_USER: bestkids_user
+      POSTGRES_PASSWORD: bestkids_password_2024_prod
+    ports:
+      - "5412:5432"
+    volumes:
+      - bestkids_postgres_data:/var/lib/postgresql/data
+    networks:
+      - bestkids_network_prod
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bestkids_backend_prod
+    restart: unless-stopped
+    ports:
+      - "4012:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=bestkids_user
+      - DB_PASSWORD=bestkids_password_2024_prod
+      - DB_DATABASE=bestkids_db
+      - JWT_SECRET=bestkids-jwt-secret-production-2024-secure
+      - CORS_ORIGIN=http://217.154.191.3:3012
+    depends_on:
+      - postgres
+    networks:
+      - bestkids_network_prod
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://217.154.191.3:4012/api
+    container_name: bestkids_frontend_prod
+    restart: unless-stopped
+    ports:
+      - "3012:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://217.154.191.3:4012/api
+    depends_on:
+      - backend
+    networks:
+      - bestkids_network_prod
+
+volumes:
+  bestkids_postgres_data:
+
+
+networks:
+  bestkids_network_prod:
+    driver: bridge

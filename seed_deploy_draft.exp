@@ -1,0 +1,33 @@
+#!/usr/bin/expect -f
+set timeout 300
+set password "k6kdDfT8"
+
+# 1. Upload files
+spawn scp -o StrictHostKeyChecking=no backend/src/database/seeds/demo-content.seeder.ts backend/run-demo-seed.ts root@217.154.191.3:/opt/bestkids-game/backend/src/database/seeds/
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 2. Run seed inside container
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && docker-compose -f docker-compose.prod.yml exec -T backend npx ts-node src/database/seeds/demo-content.seeder.ts"
+# Note: Trying to run via exec might be tricky with paths. 
+# Better approach: Copy files to correct place inside volume or just use local ts-node if mapped?
+# Production usually runs built JS. We might need to run SQL directly or use the built app context.
+# Let's try to run it via the existing NestJS context if possible, or just direct SQL if easier.
+# Actually, the 'backend' container has source code? Probably not in prod (multi-stage build).
+# PROD SOLUTION: We should execute SQL queries directly against the DB container if the backend is compiled.
+# BUT, the user wants it now.
+# Let's try to run the seed against the DB container directly using psql for maximum reliability.
+# I will convert the TS seed to SQL for the expect script.
+# Wait, let's stick to the plan but adapt.
+
+# REVISED PLAN:
+# 1. Create a SQL file with all the inserts.
+# 2. SCP the SQL file.
+# 3. Pipe it into the postgres container.
+
+exit 0

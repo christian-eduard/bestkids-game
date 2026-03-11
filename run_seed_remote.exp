@@ -1,0 +1,31 @@
+#!/usr/bin/expect -f
+set timeout 300
+set password "k6kdDfT8"
+
+# 1. Upload SQL file
+spawn scp -o StrictHostKeyChecking=no demo-seed.sql root@217.154.191.3:/opt/bestkids-game/demo-seed.sql
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 2. Execute SQL inside Postgres container
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db -f /opt/bestkids-game/demo-seed.sql"
+# Note: We are mapping the file from host to container? No, exec -T < /path/to/file works if piped.
+# Or better: "cat demo-seed.sql | docker-compose ... exec -T postgres psql ..."
+# Let's try the pipe approach which is cleaner than mounting.
+
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && cat demo-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+catch wait result
+exit [lindex $result 3]

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduFun - Actividad</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f425f4",
+                        "primary-hover": "#d11fd1",
+                        "primary-light": "#fceaff",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#221022",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d1b2d",
+                        "text-main": "#1c0d1c",
+                        "text-sub": "#9c499c",
+                        "success": "#22c55e",
+                        "error": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "1.5rem", "xl": "2rem", "2xl": "3rem", "full": "9999px" },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(244, 37, 244, 0.1)',
+                        'card': '0 8px 30px rgba(0,0,0,0.04)',
+                        'hover': '0 20px 40px -4px rgba(244, 37, 244, 0.15)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom styles for interactions */
+        .answer-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .answer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -4px rgba(244, 37, 244, 0.15);
+        }
+        .answer-card:active {
+            transform: scale(0.98);
+        }
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #e8cee8;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-main dark:text-white min-h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="w-full h-20 px-6 md:px-10 flex items-center justify-between bg-surface-light dark:bg-surface-dark border-b border-[#f4e7f4] dark:border-[#3d243d] z-20 shadow-sm relative">
+<!-- Close Button -->
+<button aria-label="Cerrar actividad" class="size-10 flex items-center justify-center rounded-full bg-background-light dark:bg-[#3d243d] text-text-sub dark:text-white hover:bg-[#e8cee8] dark:hover:bg-[#4d2f4d] transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<!-- Progress Bar Container (Centered) -->
+<div class="hidden md:flex flex-1 max-w-xl mx-8 flex-col gap-2">
+<div class="flex justify-between items-end px-1">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Gramática - Nivel 1</span>
+<span class="text-xs font-bold text-text-sub">3/10</span>
+</div>
+<div class="h-3 w-full bg-[#f4e7f4] dark:bg-[#3d243d] rounded-full overflow-hidden relative">
+<!-- Background track pattern could go here -->
+<div class="h-full bg-primary rounded-full relative transition-all duration-500 ease-out" style="width: 30%;">
+<div class="absolute inset-0 bg-white/20 w-full h-full animate-[pulse_2s_infinite]"></div>
+</div>
+</div>
+</div>
+<!-- User Stats -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-[#f4e7f4] dark:bg-[#3d243d] px-3 py-1.5 rounded-full border border-primary/20">
+<span class="material-symbols-outlined text-primary text-xl">local_fire_department</span>
+<span class="font-bold text-primary">14</span>
+</div>
+<div class="flex items-center gap-2 bg-[#fceaff] dark:bg-[#3d243d] px-3 py-1.5 rounded-full border border-primary/20">
+<span class="material-symbols-outlined text-yellow-500 text-xl">bolt</span>
+<span class="font-bold text-yellow-600 dark:text-yellow-400">250 xp</span>
+</div>
+<div class="size-10 rounded-full bg-gray-200 border-2 border-primary overflow-hidden relative" data-alt="Avatar de un niño sonriente estilo caricatura 3D" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBj5lBqyQQPk91Om3JxEul96JiPcpRAqtTevQogwpm3EbGou55g2hil4h2041rFdI4GZ2K1pchK7LiH5ft-A_z6oVgtE-5TOYdEzO-HK8Hw9vrc_YJtDSVxDg2pOFE5VQcxqnXpVOErSyg26-pM95g7yoMVDKDZtrOIdmP-VIaIxbg3RcnW1BZmK1Z8urtUwZoQwoC4WdR_-e_5qRFeOhRWLysjmRO8j6ijb8zCKtxsI9XIAGjvbkPfBg3PQbkHGJ9b9SusH3Iip1Q'); background-size: cover;">
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8 flex flex-col items-center justify-center relative z-10">
+<!-- Mobile Progress (Visible only on small screens) -->
+<div class="w-full mb-6 md:hidden">
+<div class="flex justify-between mb-2">
+<span class="text-xs font-bold text-primary">Nivel 1</span>
+<span class="text-xs font-bold text-text-sub">3/10</span>
+</div>
+<div class="h-3 w-full bg-[#f4e7f4] dark:bg-[#3d243d] rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 30%;"></div>
+</div>
+</div>
+<!-- Question Card -->
+<div class="w-full flex flex-col items-center animate-[fadeIn_0.5s_ease-out]">
+<!-- Character Helper (Absolute positioned or integrated) -->
+<div class="relative w-full max-w-3xl">
+<div class="absolute -top-16 -left-12 hidden lg:block animate-[bounce_3s_infinite]">
+<div class="w-32 h-32 bg-contain bg-no-repeat bg-center" data-alt="Mascota educativa simpática, un búho morado con gafas" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAs8PBeZkrUyj3xqmxup18YprjDbpVkayunfc6Ha9CgnTMhmwGtFNYXtDIPKJSOCOsfLJa2T80gKUgkLHxAuqbpVG14USsD3toux4FFxOLg5YgDZyv5m_vA_bhmEU2Qcric4tlQyFO_YOlY5K-oiJ-bqr_Qj7sYAoOTrGxy67xSbxI92FC0dVySyG8IZJkNAfci37ycjUeakbQN-xfHXT5UfgWWUSH0jGTXSYIMs8FEtmBhF8ujdOOyK2yiKtu3SphAvvZlY8ZxeSg');"></div>
+<!-- Speech Bubble -->
+<div class="absolute -right-20 top-0 bg-white dark:bg-surface-dark px-4 py-2 rounded-xl rounded-bl-none shadow-lg border border-primary/10">
+<p class="text-sm font-bold text-primary">¡Tú puedes!</p>
+</div>
+</div>
+<h1 class="text-2xl md:text-4xl font-bold text-center text-text-main dark:text-white mb-8 leading-tight">
+                    ¿Qué palabra rima con <span class="text-primary underline decoration-wavy decoration-2 underline-offset-4">'Gato'</span>?
+                </h1>
+</div>
+<!-- Context Image (Optional) -->
+<div class="mb-10 w-40 h-40 md:w-56 md:h-56 bg-white dark:bg-surface-dark rounded-2xl shadow-card flex items-center justify-center p-4 border-4 border-[#fceaff] dark:border-[#3d243d]">
+<div class="w-full h-full bg-contain bg-center bg-no-repeat rounded-xl" data-alt="Ilustración colorida de un gato juguetón estilo vector flat" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCD-6lceE9ar-nyK2kjC8yIzKVVy7lCpWFcS6_r8lVslCpz5dGZSN2xtDtO0mV95iIhxNWM852uHMVbQauIhzluttGlT9Nu-abVAt-qty95PYcurVI0afNKHInZzxmKuBe0U8cOyNfBCP93K9hs84i-UnqC4rYjvJ5a2F0iP0SlwDVi99nsJl-ezS-tiIMRBkxrRl6kWF1KxOjExVC3JlMT-IbN2escpElqudN1sIEa9CPRHbIfW03RUPudUCzDOHl29aaXs3rxdCc');"></div>
+</div>
+<!-- Answer Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full max-w-4xl">
+<!-- Option 1 -->
+<label class="group relative cursor-pointer">
+<input class="peer sr-only" name="rhyme" type="radio"/>
+<div class="answer-card h-full bg-white dark:bg-surface-dark rounded-xl md:rounded-2xl border-2 border-transparent p-4 flex flex-col items-center justify-center gap-3 shadow-sm hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary-light peer-checked:shadow-soft dark:peer-checked:bg-primary/20">
+<div class="w-24 h-24 bg-[#f8f5f8] dark:bg-[#3d243d] rounded-lg overflow-hidden mb-2">
+<div class="w-full h-full bg-cover bg-center" data-alt="Icono o dibujo simple de una mesa" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDxNMZuVavSwiJ_9FP7b71YzkG4a56c2Ow_hCAdRda02wPscq9647sL5g3on7-iNG9wUw2_SFq5cjUBg6qXCaCgnW3XZaJ2MGT69rwr1lRKr7qbYVccS5itgB-2CcWmyJtj5Hn7yWrer6XMbXjpLCDOTclGYAKC5ixURlgUxq55bxFbyvFIF9hG54CtRcwhOUVYwSIjtmkvOCEfI7akkFPoPyIMRWxZwQYuaEaamLPbrmhTXPrnK2KmGIboFfjq05DeGyVYQ6ofGmg');"></div>
+</div>
+<span class="text-lg md:text-xl font-bold text-text-main dark:text-white group-hover:text-primary transition-colors">Mesa</span>
+<!-- Checkmark Indicator -->
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity text-primary">
+<span class="material-symbols-outlined fill text-2xl">check_circle</span>
+</div>
+</div>
+</label>
+<!-- Option 2 (Correct) -->
+<label class="group relative cursor-pointer">
+<input class="peer sr-only" name="rhyme" type="radio"/>
+<div class="answer-card h-full bg-white dark:bg-surface-dark rounded-xl md:rounded-2xl border-2 border-transparent p-4 flex flex-col items-center justify-center gap-3 shadow-sm hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary-light peer-checked:shadow-soft dark:peer-checked:bg-primary/20">
+<div class="w-24 h-24 bg-[#f8f5f8] dark:bg-[#3d243d] rounded-lg overflow-hidden mb-2">
+<div class="w-full h-full bg-cover bg-center" data-alt="Icono o dibujo simple de un pato amarillo" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCmUFXLbqpcrs82ohiBpCJkWV8ZU_VPAFTOy3ZTlYRTgj7u1ZqPbr632DSQqBUu1eiqNoS8EDANMU4Ypp4L18wbTmQpW6BnvddAQjZ2QMM81zAWcbkbofp1580Ya72_PN7blViTO_9_D8q-09d4pLDgz5cJFAwd91CrK1lmlH-Agvv6SpJ2Xxr59xdCEFmcIfUnrJwNClX2JvKnapWu7rZ-SzBCrK1y_ncWm1tVWssjSb9Ei5WMsoJ4RvwEJvS343hpxh1YSzJzMl8');"></div>
+</div>
+<span class="text-lg md:text-xl font-bold text-text-main dark:text-white group-hover:text-primary transition-colors">Pato</span>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity text-primary">
+<span class="material-symbols-outlined fill text-2xl">check_circle</span>
+</div>
+</div>
+</label>
+<!-- Option 3 -->
+<label class="group relative cursor-pointer">
+<input class="peer sr-only" name="rhyme" type="radio"/>
+<div class="answer-card h-full bg-white dark:bg-surface-dark rounded-xl md:rounded-2xl border-2 border-transparent p-4 flex flex-col items-center justify-center gap-3 shadow-sm hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary-light peer-checked:shadow-soft dark:peer-checked:bg-primary/20">
+<div class="w-24 h-24 bg-[#f8f5f8] dark:bg-[#3d243d] rounded-lg overflow-hidden mb-2">
+<div class="w-full h-full bg-cover bg-center" data-alt="Icono o dibujo simple de una casa" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAcpqapYlWS602aPcjXT4NjXCeKgZvU0nKxAJwoq0KlmjMKXq-HPa3F7_hc1O5LALtXUuND-cv3cN1MlC49ho7UE6W_4aJ5gr8hWLnWmOjRWnlIiN_FDBsBch97FGOx20UaGsTvOuvqH0V8NMn8UeQVgYjDCVRHqbhoPZ63OFZ29yiIyXmTkvAMPAb_hmf9idB9Nrih9_Z5wybWm26staTL3H78X8vww6UJWpE-x8itHYFJTQzGk3urthHyVwhTi3p00pshe7KMqYk');"></div>
+</div>
+<span class="text-lg md:text-xl font-bold text-text-main dark:text-white group-hover:text-primary transition-colors">Casa</span>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity text-primary">
+<span class="material-symbols-outlined fill text-2xl">check_circle</span>
+</div>
+</div>
+</label>
+<!-- Option 4 -->
+<label class="group relative cursor-pointer">
+<input class="peer sr-only" name="rhyme" type="radio"/>
+<div class="answer-card h-full bg-white dark:bg-surface-dark rounded-xl md:rounded-2xl border-2 border-transparent p-4 flex flex-col items-center justify-center gap-3 shadow-sm hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary-light peer-checked:shadow-soft dark:peer-checked:bg-primary/20">
+<div class="w-24 h-24 bg-[#f8f5f8] dark:bg-[#3d243d] rounded-lg overflow-hidden mb-2">
+<div class="w-full h-full bg-cover bg-center" data-alt="Icono o dibujo simple de una flor roja" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDlL2MYCoI7YznDVmHQ2k6H9QXDu5Wjkw3EmEOBBvaGQ6nLio1YNgY8nsAha7-pr3j72gcRYWyvhvVJ93MLqzSGKE-aa5bAeY1ZQ87fIkSpGCy0u_lEb9778SDS-Qu9qy25AnXvjNn8tdagKgs2djxS4wA_lk5er0K9aaBSV9hUsrVIfqTJSqfsxjg2caV9TOL9-RixkB6FiIBYrh_-8id74qe02xvXqm6Afj8tP_Drw3NSxgOAbentkFVwoNjeCzK9IwoibTU2Hn4');"></div>
+</div>
+<span class="text-lg md:text-xl font-bold text-text-main dark:text-white group-hover:text-primary transition-colors">Flor</span>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity text-primary">
+<span class="material-symbols-outlined fill text-2xl">check_circle</span>
+</div>
+</div>
+</label>
+</div>
+</div>
+</main>
+<!-- Footer Action Bar -->
+<footer class="w-full bg-surface-light dark:bg-surface-dark border-t border-[#f4e7f4] dark:border-[#3d243d] p-4 md:p-6 z-20 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)]">
+<div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+<!-- Feedback Message (Hidden by default, shown for demo) -->
+<div class="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-background-light dark:bg-background-dark border border-gray-100 dark:border-gray-800 opacity-0">
+<div class="size-8 rounded-full bg-gray-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-400">info</span>
+</div>
+<p class="text-sm text-gray-500 font-medium">Selecciona una respuesta para continuar</p>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full md:w-auto min-w-[200px] h-14 bg-primary hover:bg-primary-hover text-white text-lg font-bold rounded-full shadow-lg shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide group">
+<span>Comprobar</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<!-- Skip Button (Secondary) -->
+<button class="md:hidden w-full text-text-sub text-sm font-bold py-2">
+                Saltar esta pregunta
+            </button>
+</div>
+</footer>
+<!-- Background Decorative Elements -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+<!-- Abstract Blob 1 -->
+<div class="absolute top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+<!-- Abstract Blob 2 -->
+<div class="absolute bottom-20 right-10 w-96 h-96 bg-[#9c499c]/5 rounded-full blur-3xl"></div>
+</div>
+</body></html>

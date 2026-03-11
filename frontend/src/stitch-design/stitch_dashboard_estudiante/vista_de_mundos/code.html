@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vista de Mundos - Plataforma Educativa</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f425f4",
+                        "primary-hover": "#d11cd1",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#221022",
+                        "card-light": "#ffffff",
+                        "card-dark": "#362036",
+                        "text-main": "#1c0d1c",
+                        "text-light": "#fcf8fc",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"],
+                        "body": ["Spline Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "1.5rem", "xl": "2rem", "2xl": "2.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Spline Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-text-light transition-colors duration-300 min-h-screen flex flex-col font-display selection:bg-primary selection:text-white">
+<!-- Top Navigation -->
+<nav class="sticky top-0 z-50 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#f4e7f4] dark:border-[#3d1e3d] px-6 py-4">
+<div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+<!-- Brand -->
+<div class="flex items-center gap-3">
+<div class="size-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<h1 class="text-xl md:text-2xl font-bold tracking-tight hidden sm:block">VISTA DE MUNDOS</h1>
+</div>
+<!-- Search Bar (Desktop) -->
+<div class="hidden md:flex flex-1 max-w-md mx-8">
+<div class="relative w-full group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-primary">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border-none rounded-full leading-5 bg-white dark:bg-card-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 sm:text-sm shadow-sm transition-all" placeholder="Buscar aventuras..." type="text"/>
+</div>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-3 sm:gap-4">
+<!-- Level Badge -->
+<div class="hidden sm:flex items-center gap-2 bg-white dark:bg-card-dark pr-4 pl-1 py-1 rounded-full shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="size-8 rounded-full bg-yellow-400 flex items-center justify-center text-yellow-900">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</div>
+<div class="flex flex-col leading-none">
+<span class="text-[10px] uppercase font-bold text-gray-400">Nivel</span>
+<span class="text-sm font-bold text-primary">12</span>
+</div>
+</div>
+<!-- Icons -->
+<button class="flex items-center justify-center size-10 rounded-full bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-200 shadow-sm transition-transform hover:scale-105">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center size-10 rounded-full bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Hero Section -->
+<header class="mb-10 relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-primary shadow-xl">
+<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+<div class="relative z-10 px-8 py-10 md:py-14 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="text-white max-w-xl">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-xs font-bold uppercase tracking-wider mb-4">
+<span class="size-2 rounded-full bg-green-400 animate-pulse"></span>
+                        Nueva Misión Disponible
+                    </div>
+<h2 class="text-3xl md:text-5xl font-bold mb-4 leading-tight">¡Hola, Explorador!</h2>
+<p class="text-lg md:text-xl text-white/90 font-medium">¿Listo para continuar tu viaje de aprendizaje hoy?</p>
+</div>
+<div class="hidden md:block">
+<div class="size-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border-4 border-white/20 shadow-2xl animate-[bounce_3s_infinite]">
+<span class="material-symbols-outlined text-6xl text-white drop-shadow-md">sports_esports</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Filters & Title -->
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+<h3 class="text-2xl font-bold text-text-main dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">map</span>
+                Mis Mundos
+            </h3>
+<div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
+<button class="px-5 py-2 rounded-full bg-primary text-white font-semibold shadow-md shadow-primary/20 transition hover:bg-primary-hover whitespace-nowrap">
+                    Todos
+                </button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-card-dark text-gray-600 dark:text-gray-300 font-medium border border-gray-100 dark:border-gray-700 hover:border-primary/30 hover:text-primary transition whitespace-nowrap">
+                    Matemáticas
+                </button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-card-dark text-gray-600 dark:text-gray-300 font-medium border border-gray-100 dark:border-gray-700 hover:border-primary/30 hover:text-primary transition whitespace-nowrap">
+                    Ciencias
+                </button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-card-dark text-gray-600 dark:text-gray-300 font-medium border border-gray-100 dark:border-gray-700 hover:border-primary/30 hover:text-primary transition whitespace-nowrap">
+                    Idiomas
+                </button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-card-dark text-gray-600 dark:text-gray-300 font-medium border border-gray-100 dark:border-gray-700 hover:border-primary/30 hover:text-primary transition whitespace-nowrap">
+                    Arte
+                </button>
+</div>
+</div>
+<!-- Worlds Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Card 1: Math (Active) -->
+<div class="group relative bg-card-light dark:bg-card-dark rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-primary/20">
+<div class="h-40 w-full relative overflow-hidden bg-blue-100 dark:bg-blue-900/30">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Abstract bright blue 3d geometric shapes representing math" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKnBclNm9COghCVw5mOkK6e1gfXBlYwHREApNCy3uTWAN-0RkCDfl-EEErfJegWT4Yz6KsEvlhRNDGt4subml4caaTXxwWDP2494VtvBzqy08Ev8jdbYqZSX_xfr4ak_ayYak1MjETKYrgyEeM4iJkhSXd05VTHZ8B1JDP6G3iBWpx5mORDad5rMNTtSbzyyeEygvSjLA9-E2VumlI6XfRm55hF8nVPqJ83FDZDIl6JaJF_f8XhvJeR3uOcF29fL52B08JTOpLIIU');"></div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-blue-600 dark:text-blue-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">calculate</span> Mate
+                    </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-lg font-bold text-text-main dark:text-white leading-tight">Mundo Numérico</h4>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">Domina las sumas, restas y descubre la magia de los números.</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
+<span>Progreso</span>
+<span>75%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+<div class="bg-primary h-2.5 rounded-full transition-all duration-1000 w-[75%] shadow-[0_0_10px_rgba(244,37,244,0.5)]"></div>
+</div>
+</div>
+<button class="mt-5 w-full py-2.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-sm transition-colors duration-200 flex items-center justify-center gap-2 group/btn">
+                        Continuar
+                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover/btn:translate-x-1">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Science (Active) -->
+<div class="group relative bg-card-light dark:bg-card-dark rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-primary/20">
+<div class="h-40 w-full relative overflow-hidden bg-green-100 dark:bg-green-900/30">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Science laboratory beakers with colorful liquids close up" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA-dqBxXHuna3CGEk18AvDH0j0-jjj4N-KZe8PcDsaAAv4I9d-QLUjQ3c5w-r5Rrb-n48DF6a_gr35RRVgReTCoXkuH_q5Gd_T96FPHwyME3oEzkrlQ0GrCqYZO-e5Y0_7Gf7Z21gtg94UBgp5cCDhK4Zv_4NL1eL4demlk2JhC3-NtGM7exHQze-Y75LJ9FN53AOYvJsGEpQ6PX2wehwDfCgf6tfNu8TcfFDeN3ZHNlE4uRwi3RKVGXfoKf32bQ6Xc4on_Ekf4kvI');"></div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-green-600 dark:text-green-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">science</span> Ciencia
+                    </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-lg font-bold text-text-main dark:text-white leading-tight">Laboratorio Espacial</h4>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">Experimentos divertidos y viajes a través de las estrellas.</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
+<span>Progreso</span>
+<span>40%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+<div class="bg-green-500 h-2.5 rounded-full transition-all duration-1000 w-[40%]"></div>
+</div>
+</div>
+<button class="mt-5 w-full py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-green-500 text-text-main dark:text-white hover:text-white font-bold text-sm transition-colors duration-200 flex items-center justify-center gap-2 group/btn">
+                        Jugar
+                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover/btn:translate-x-1">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Language (Complete) -->
+<div class="group relative bg-card-light dark:bg-card-dark rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 border-yellow-400/30">
+<div class="absolute top-3 left-3 z-20">
+<div class="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-[14px]">emoji_events</span> Completado
+                    </div>
+</div>
+<div class="h-40 w-full relative overflow-hidden bg-orange-100 dark:bg-orange-900/30">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Stack of books in a library representing knowledge" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCzmN_pBNRDc5PnLFKC71AlLXmVYPr_6D9A4Dm3kTKgAFVPopMBiMrvqMX9u1ofMb5hXwKgs9cOKIjrbaD76KtYXVa7PgWrxHOjHf49kaVej_cdvXZR-w6y1GlGOd1gJ9DtI3N2c2W1iE38VedbuUN0c8X_4LzlYVeHAcEytrZUQ-JTmAlbJE7LXL_PRle5TgyV04ckXHZy3drjwNhWgdRtp454ps6i79zfw1puHof0JK8C9Ab9XbuxoR9gQ2nfmA16OfRL9gx_P14');"></div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-orange-600 dark:text-orange-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">translate</span> Idiomas
+                    </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-lg font-bold text-text-main dark:text-white leading-tight">Bosque de Letras</h4>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">Aprende nuevas palabras y conviértete en un maestro lector.</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
+<span>Progreso</span>
+<span>100%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+<div class="bg-yellow-400 h-2.5 rounded-full transition-all duration-1000 w-[100%]"></div>
+</div>
+</div>
+<button class="mt-5 w-full py-2.5 rounded-xl bg-yellow-400/20 hover:bg-yellow-400 text-yellow-700 hover:text-yellow-900 font-bold text-sm transition-colors duration-200 flex items-center justify-center gap-2 group/btn">
+                        Repasar
+                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover/btn:translate-x-1">history</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Biology (New) -->
+<div class="group relative bg-card-light dark:bg-card-dark rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-primary/20">
+<div class="h-40 w-full relative overflow-hidden bg-teal-100 dark:bg-teal-900/30">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Green forest with sunlight rays representing nature and biology" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWwRpehW6ZdD5NOQiDCpiaUBDSHxjMErHPPc2rU-UbTjtkBwKtrz66om8LkEbSjLFbEGtt3MXj2kaoIhGT2b3Y_Ug_M-64tqiF-gnhKE6PVUZUFEGTu_-XuTOe1ZP2G8f1iV2WLZNZlUf9K09i0CE_hTmDm190-09oi_eCqAkoyUepFtDguzoZrWPh4ogMWDa_3jb_vKxpmKMoR053Xe00CedSFS1Z2BiknScIqq1EqmgCuNJa1K4L_unouKl6lwfLHLF5eRbGfxw');"></div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-teal-600 dark:text-teal-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">pets</span> Biología
+                    </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-lg font-bold text-text-main dark:text-white leading-tight">Reino Animal</h4>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">Explora la selva y conoce a las criaturas más fascinantes.</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
+<span>Progreso</span>
+<span>15%</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+<div class="bg-teal-500 h-2.5 rounded-full transition-all duration-1000 w-[15%]"></div>
+</div>
+</div>
+<button class="mt-5 w-full py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-teal-500 text-text-main dark:text-white hover:text-white font-bold text-sm transition-colors duration-200 flex items-center justify-center gap-2 group/btn">
+                        Jugar
+                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover/btn:translate-x-1">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Card 5: History (Locked) -->
+<div class="group relative bg-card-light dark:bg-card-dark rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 opacity-90">
+<!-- Lock Overlay -->
+<div class="absolute inset-0 bg-gray-200/50 dark:bg-gray-900/70 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-6 text-center transition-all duration-300 group-hover:bg-gray-200/40 dark:group-hover:bg-gray-900/60">
+<div class="size-14 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center mb-3 shadow-inner">
+<span class="material-symbols-outlined text-3xl">lock</span>
+</div>
+<h5 class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">Mundo Bloqueado</h5>
+<p class="text-xs text-gray-500 dark:text-gray-400 bg-white/80 dark:bg-black/50 px-3 py-1 rounded-full">Alcanza el Nivel 15</p>
+</div>
+<div class="h-40 w-full relative overflow-hidden bg-gray-300 grayscale">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Ancient greek architecture ruins representing history" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDnPCrbcd8YDqjhPAjxk5FUyuPgmQnNnEolfJxmSzeSli98cZ-cs6pBd934KDW9qFiDCCPjFJUWqpY5P-ruxDHinlbbVTfia0u_y1mXm5TngPqMHL0OpLV0gmCPzj0Gp6R0XlDgOKtzVtmxJjWrkVpU1-JAtxoZ0kvp2hfDoi9gGwsaWA-HXfgwHEjhc5pgpn3uTF5n0zMiCrxaVL13rg6BL8-iCG7_5cJh6LIq6mK9s34qD8JWnUResErNrKWauX7u_T3yNEuCmVY');"></div>
+</div>
+<div class="p-5 grayscale opacity-50">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-lg font-bold text-text-main dark:text-white leading-tight">Historia Antigua</h4>
+</div>
+<p class="text-sm text-gray-500 mb-4 line-clamp-2">Viaja al pasado y descubre los secretos de los faraones.</p>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+<div class="bg-gray-300 h-2.5 w-0"></div>
+</div>
+<button class="mt-5 w-full py-2.5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2">
+                        Bloqueado
+                    </button>
+</div>
+</div>
+<!-- Card 6: Art (Locked) -->
+<div class="group relative bg-card-light dark:bg-card-dark rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 opacity-90">
+<!-- Lock Overlay -->
+<div class="absolute inset-0 bg-gray-200/50 dark:bg-gray-900/70 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-6 text-center transition-all duration-300 group-hover:bg-gray-200/40 dark:group-hover:bg-gray-900/60">
+<div class="size-14 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center mb-3 shadow-inner">
+<span class="material-symbols-outlined text-3xl">lock</span>
+</div>
+<h5 class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">Mundo Bloqueado</h5>
+<p class="text-xs text-gray-500 dark:text-gray-400 bg-white/80 dark:bg-black/50 px-3 py-1 rounded-full">Completa 'Mundo Numérico'</p>
+</div>
+<div class="h-40 w-full relative overflow-hidden bg-gray-300 grayscale">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Colorful paint splashes and art supplies" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBnxXhmkX3bHx--2VKBpnn9LXeYacGFaTjdi3CJ1Zf1ZD3Rgw1Gzvt68hFLDCBEoVvmSUMyHLJbiaD7mEmhOVRci2G5WZg6J7Pi2Yr8xfFx_WLHNIRsvSGB-LeBcKWivKMQ_NKh34rOoMHmRWUUhhT6j6FjBMcqA_7ZeNax5vDsuC1s_mTEmMnorSCX6tQhRjZ7JM2UBy_6cMGHW3n2O4GB68CXkbn-9dPeA9ttsfX3z7EGx3j5pKfXd78jA8rDSMiOGskupuQcISg');"></div>
+</div>
+<div class="p-5 grayscale opacity-50">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-lg font-bold text-text-main dark:text-white leading-tight">Arte y Color</h4>
+</div>
+<p class="text-sm text-gray-500 mb-4 line-clamp-2">Pinta, dibuja y expresa tu creatividad al máximo.</p>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+<div class="bg-gray-300 h-2.5 w-0"></div>
+</div>
+<button class="mt-5 w-full py-2.5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2">
+                        Bloqueado
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer -->
+<footer class="mt-auto w-full py-6 text-center text-sm text-gray-400 dark:text-gray-600 border-t border-[#f4e7f4] dark:border-[#3d1e3d]">
+<div class="flex items-center justify-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>Modo Seguro Infantil Activado</span>
+</div>
+<p>© 2023 Plataforma Educativa Gamificada.</p>
+</footer>
+</body></html>

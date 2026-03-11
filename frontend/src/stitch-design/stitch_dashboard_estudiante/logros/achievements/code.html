@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduQuest - Achievements</title>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f425f4",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#221022",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d1b2d",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "1.5rem", "xl": "2rem", "2xl": "2.5rem", "full": "9999px"},
+                    boxShadow: {
+                        "soft": "0 4px 20px -2px rgba(244, 37, 244, 0.1)",
+                        "glow": "0 0 15px rgba(244, 37, 244, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#1c0d1c] dark:text-white font-display transition-colors duration-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#f4e7f4] dark:border-white/10 px-10 py-4 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">school</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">EduQuest</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<div class="hidden lg:flex items-center gap-9">
+<a class="text-sm font-bold text-primary" href="#">Achievements</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Lessons</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Leaderboard</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Profile</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end">
+<span class="text-sm font-bold">Alex Explorer</span>
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Level 12</span>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white dark:border-gray-700 shadow-sm" data-alt="User avatar showing a smiling cartoon child" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA9Tzybm8BrLNhnH1v3-0PNLWKfOfnQu15Yx2C_ycWotu58OPhL_UPDbiA8rftENNJ4qJR_CE7o3j1nBay29ZiugRb4lh_w89Y4xXM42DaLXMcOtYCY-uy127LqPZ-1HDbPjxz8s2VfkneVLyuEjT2YSLCMw6RQIzOfsAQYN4qxz9C6JGN5ZCwpFDgCDBtlzX57UjHIZON_FQw_sV54UWl9a9hLJrckMg_S6LktKVhiki6Ai0V5kS9Cj3Z2FYoxyW37w8gynwxHBAw");'></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 justify-center py-8 px-4 md:px-10 lg:px-40">
+<div class="flex flex-col max-w-[1200px] flex-1 gap-8">
+<!-- Hero / Stats Section -->
+<div class="@container">
+<div class="flex flex-col md:flex-row gap-6 bg-gradient-to-r from-violet-600 to-primary rounded-xl p-8 shadow-glow text-white relative overflow-hidden">
+<!-- Decorator Circles -->
+<div class="absolute -top-20 -right-20 size-60 rounded-full bg-white/10 blur-3xl"></div>
+<div class="absolute bottom-0 left-20 size-40 rounded-full bg-black/10 blur-2xl"></div>
+<div class="flex flex-col justify-center gap-2 z-10 flex-1">
+<h1 class="text-3xl md:text-5xl font-black tracking-tight">My Trophy Room</h1>
+<p class="text-white/90 text-lg font-medium max-w-lg">
+                                You've unlocked <span class="font-bold bg-white/20 px-2 py-0.5 rounded-lg">12</span> legendary badges! You are on fire! 🔥
+                            </p>
+<div class="mt-6 flex gap-3">
+<button class="flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-full font-bold text-sm shadow-lg hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px]">emoji_events</span>
+                                    Claim Weekly Reward
+                                </button>
+</div>
+</div>
+<!-- Level Progress Card -->
+<div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5 w-full md:w-80 flex flex-col justify-between z-10">
+<div class="flex justify-between items-center mb-2">
+<span class="font-bold text-sm uppercase tracking-wider opacity-80">Next Level</span>
+<span class="font-bold text-xl">Level 13</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between text-xs font-medium opacity-90">
+<span>2,450 XP</span>
+<span>3,000 XP</span>
+</div>
+<div class="h-3 w-full bg-black/20 rounded-full overflow-hidden">
+<div class="h-full bg-white rounded-full w-[80%] shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
+</div>
+<p class="text-xs mt-1 text-center font-medium bg-black/20 py-1 rounded-lg">550 XP to level up!</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Filters & Search -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary text-white px-5 shadow-soft transition-transform hover:scale-105">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="text-sm font-bold">All</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 px-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-[20px]">calculate</span>
+<span class="text-sm font-medium">Math</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 px-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-[20px]">science</span>
+<span class="text-sm font-medium">Science</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 px-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-[20px]">palette</span>
+<span class="text-sm font-medium">Creativity</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 px-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span class="text-sm font-medium">Reading</span>
+</button>
+</div>
+<div class="relative w-full md:w-64">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-400">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border-none rounded-full leading-5 bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-sm font-medium" placeholder="Search badges..." type="text"/>
+</div>
+</div>
+<!-- Main Grid Section -->
+<div class="flex flex-col gap-6">
+<h3 class="text-2xl font-bold px-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-yellow-500 fill-current">star</span> 
+                        Unlocked Badges
+                    </h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+<!-- Unlocked Card 1 -->
+<div class="group relative bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft hover:shadow-glow hover:-translate-y-1 transition-all duration-300 flex flex-col gap-4 border border-transparent hover:border-primary/20">
+<div class="absolute top-4 right-4 text-green-500 bg-green-50 dark:bg-green-900/30 p-1 rounded-full">
+<span class="material-symbols-outlined text-[20px] font-bold">check</span>
+</div>
+<div class="size-16 rounded-2xl bg-gradient-to-br from-yellow-300 to-orange-500 flex items-center justify-center shadow-lg transform group-hover:rotate-3 transition-transform">
+<span class="material-symbols-outlined text-white text-4xl">local_fire_department</span>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1">Streak Master</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400 leading-normal">Logged in for 7 days in a row without missing a beat.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+                                Unlocked Oct 12
+                            </div>
+</div>
+<!-- Unlocked Card 2 -->
+<div class="group relative bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft hover:shadow-glow hover:-translate-y-1 transition-all duration-300 flex flex-col gap-4 border border-transparent hover:border-primary/20">
+<div class="absolute top-4 right-4 text-green-500 bg-green-50 dark:bg-green-900/30 p-1 rounded-full">
+<span class="material-symbols-outlined text-[20px] font-bold">check</span>
+</div>
+<div class="size-16 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg transform group-hover:-rotate-3 transition-transform">
+<span class="material-symbols-outlined text-white text-4xl">functions</span>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1">Math Wizard</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400 leading-normal">Solved 50 multiplication problems with 100% accuracy.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+                                Unlocked Nov 05
+                            </div>
+</div>
+<!-- Unlocked Card 3 -->
+<div class="group relative bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft hover:shadow-glow hover:-translate-y-1 transition-all duration-300 flex flex-col gap-4 border border-transparent hover:border-primary/20">
+<div class="absolute top-4 right-4 text-green-500 bg-green-50 dark:bg-green-900/30 p-1 rounded-full">
+<span class="material-symbols-outlined text-[20px] font-bold">check</span>
+</div>
+<div class="size-16 rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-lg transform group-hover:rotate-3 transition-transform">
+<span class="material-symbols-outlined text-white text-4xl">favorite</span>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1">Helpful Hero</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400 leading-normal">Helped 5 friends solve a puzzle in the community hub.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+                                Unlocked Nov 10
+                            </div>
+</div>
+<!-- Unlocked Card 4 -->
+<div class="group relative bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft hover:shadow-glow hover:-translate-y-1 transition-all duration-300 flex flex-col gap-4 border border-transparent hover:border-primary/20">
+<div class="absolute top-4 right-4 text-green-500 bg-green-50 dark:bg-green-900/30 p-1 rounded-full">
+<span class="material-symbols-outlined text-[20px] font-bold">check</span>
+</div>
+<div class="size-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-white text-4xl">eco</span>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1">Eco Warrior</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400 leading-normal">Completed the "Save the Planet" biology module.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+                                Unlocked Dec 01
+                            </div>
+</div>
+</div>
+</div>
+<!-- Locked & In Progress Section -->
+<div class="flex flex-col gap-6 mt-4">
+<h3 class="text-2xl font-bold px-1 flex items-center gap-2 text-gray-600 dark:text-gray-300">
+<span class="material-symbols-outlined">lock</span> 
+                        Upcoming Challenges
+                    </h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+<!-- In Progress Card -->
+<div class="bg-white dark:bg-surface-dark rounded-xl p-5 border-2 border-primary/20 flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-primary/10 px-3 py-1 rounded-bl-xl text-xs font-bold text-primary">IN PROGRESS</div>
+<div class="size-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center grayscale opacity-80">
+<span class="material-symbols-outlined text-gray-400 text-4xl">rocket_launch</span>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1">Space Cadet</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Complete 5 Astronomy lessons.</p>
+<div class="flex justify-between text-xs font-bold mb-1">
+<span>3/5 Lessons</span>
+<span class="text-primary">60%</span>
+</div>
+<div class="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[60%]"></div>
+</div>
+</div>
+</div>
+<!-- Locked Card 1 -->
+<div class="bg-gray-50 dark:bg-white/5 rounded-xl p-5 border border-dashed border-gray-300 dark:border-gray-700 flex flex-col gap-4 opacity-70 hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<div class="size-16 rounded-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-gray-400 text-4xl">psychology</span>
+<div class="absolute -bottom-2 -right-2 bg-gray-500 text-white p-1 rounded-full border-2 border-white dark:border-surface-dark">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1 text-gray-700 dark:text-gray-300">Big Brain</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Finish all Logic Puzzles in Chapter 3.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                Requires Level 15
+                            </div>
+</div>
+<!-- Locked Card 2 -->
+<div class="bg-gray-50 dark:bg-white/5 rounded-xl p-5 border border-dashed border-gray-300 dark:border-gray-700 flex flex-col gap-4 opacity-70 hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<div class="size-16 rounded-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-gray-400 text-4xl">brush</span>
+<div class="absolute -bottom-2 -right-2 bg-gray-500 text-white p-1 rounded-full border-2 border-white dark:border-surface-dark">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1 text-gray-700 dark:text-gray-300">Da Vinci</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Upload 10 creative drawings to the gallery.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                Requires 500 Art XP
+                            </div>
+</div>
+<!-- Locked Card 3 -->
+<div class="bg-gray-50 dark:bg-white/5 rounded-xl p-5 border border-dashed border-gray-300 dark:border-gray-700 flex flex-col gap-4 opacity-70 hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<div class="size-16 rounded-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-gray-400 text-4xl">library_music</span>
+<div class="absolute -bottom-2 -right-2 bg-gray-500 text-white p-1 rounded-full border-2 border-white dark:border-surface-dark">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-bold mb-1 text-gray-700 dark:text-gray-300">Maestro</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Score 100% on a Rhythm game level.</p>
+</div>
+<div class="mt-auto pt-2 text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                Locked
+                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

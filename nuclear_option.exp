@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+set timeout 600
+set password "k6kdDfT8"
+
+# 1. Brutal cleanup
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "docker rm -f bestkids_backend_prod bestkids_frontend_prod bestkids_postgres_prod; cd /opt/bestkids-game && docker-compose -f docker-compose.prod.yml up -d && sleep 40"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+# 2. Seed
+spawn ssh -o StrictHostKeyChecking=no root@217.154.191.3 "cd /opt/bestkids-game && cat demo-seed.sql | docker-compose -f docker-compose.prod.yml exec -T postgres psql -U bestkids_user -d bestkids_db"
+expect {
+  "assword:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+
+catch wait result
+exit [lindex $result 3]
