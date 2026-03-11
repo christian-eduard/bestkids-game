@@ -111,11 +111,25 @@ export default function SeñalarImagen({ exercise, onAnswer }: Props) {
                             : 'border-blue-100 hover:border-blue-200'
                             }`}
                     >
-                        {option.imageUrl ? (
-                            <img src={option.imageUrl} className="w-full h-full object-contain rounded-2xl" alt={option.text} />
-                        ) : (
-                            <span className="text-4xl font-bold text-gray-700">{option.text}</span>
-                        )}
+                        <div className="flex flex-col items-center justify-between h-full w-full gap-3">
+                            {option.imageUrl ? (
+                                <div className="flex-1 flex items-center justify-center w-full min-h-0">
+                                    <img 
+                                        src={option.imageUrl} 
+                                        className="max-w-full max-h-full object-contain rounded-2xl p-1" 
+                                        alt={option.text || ""} 
+                                    />
+                                </div>
+                            ) : null}
+
+                            {option.text ? (
+                                <div className={`${option.imageUrl ? 'w-full py-2.5 bg-slate-50 border-2 border-slate-100 rounded-2xl shadow-sm' : ''} text-center`}>
+                                    <span className={`${option.imageUrl ? 'text-lg px-2' : 'text-4xl px-4'} font-black text-slate-800 uppercase tracking-tight block truncate`}>
+                                        {option.text}
+                                    </span>
+                                </div>
+                            ) : null}
+                        </div>
 
                         {selectedIds.includes(option.id) && (
                             <div className="absolute top-4 right-4 bg-purple-500 text-white rounded-full p-1 shadow-lg">
