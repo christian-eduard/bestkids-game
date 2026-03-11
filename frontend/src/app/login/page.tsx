@@ -220,21 +220,30 @@ export default function BestKidsLogin() {
                             </button>
                             {showDevMenu && (
                                 <div className="absolute bottom-full left-0 right-0 mb-2 p-2 grid gap-1 bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl z-50 max-h-72 overflow-y-auto border-t-2 border-t-primary animate-in slide-in-from-bottom-4 duration-300">
-                                    {['master', 'admin', 'teacher1', 'parent1', 'student1', 'student2', 'student3'].map((user) => (
+                                    {[
+                                        { id: 'master', label: 'Master Admin', role: 1, icon: 'shield' },
+                                        { id: 'admin', label: 'Coordinador Centro', role: 2, icon: 'apartment' },
+                                        { id: 'teacher1', label: 'Profesor Titular', role: 3, icon: 'school' },
+                                        { id: 'parent1', label: 'Padre/Madre', role: 4, icon: 'family_restroom' },
+                                        { id: 'student1', label: 'Alumno Estrella', role: 5, icon: 'child_care' }
+                                    ].map((devUser) => (
                                         <button
-                                            key={user}
+                                            key={devUser.id}
                                             type="button"
                                             onClick={async () => {
                                                 setShowDevMenu(false);
                                                 setLoading(true);
                                                 try {
-                                                    await login(user, 'admin123');
+                                                    await login(devUser.id, 'admin123'); // Usando password estandar de dev
                                                     await new Promise(r => setTimeout(r, 100));
-                                                    if (user === 'master') window.location.href = '/dashboard/admin';
-                                                    else if (user === 'admin') window.location.href = '/dashboard/center';
-                                                    else if (user.includes('teacher')) window.location.href = '/dashboard/teacher';
-                                                    else if (user.includes('parent')) window.location.href = '/dashboard/parent';
-                                                    else window.location.href = '/dashboard';
+                                                    
+                                                    switch (devUser.role) {
+                                                        case 1: window.location.href = '/dashboard/admin'; break;
+                                                        case 2: window.location.href = '/dashboard/center'; break;
+                                                        case 3: window.location.href = '/dashboard/teacher'; break;
+                                                        case 4: window.location.href = '/dashboard/parent'; break;
+                                                        default: window.location.href = '/dashboard'; break;
+                                                    }
                                                 } catch (err) {
                                                     setError('Error sincronización dev');
                                                     setLoading(false);
@@ -244,20 +253,14 @@ export default function BestKidsLogin() {
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className={`size-8 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg
-                                                    ${user.includes('student') ? 'bg-emerald-500' :
-                                                        user.includes('parent') ? 'bg-purple-500' :
-                                                            user.includes('teacher') ? 'bg-blue-500' :
-                                                                user === 'master' ? 'bg-red-500' : 'bg-orange-500'}`}>
-                                                    {user[0].toUpperCase()}
+                                                    ${devUser.role === 5 ? 'bg-emerald-500' :
+                                                        devUser.role === 4 ? 'bg-purple-500' :
+                                                            devUser.role === 3 ? 'bg-blue-500' :
+                                                                devUser.role === 1 ? 'bg-red-500' : 'bg-orange-500'}`}>
+                                                    <span className="material-symbols-outlined !text-sm">{devUser.icon}</span>
                                                 </div>
                                                 <span className="text-xs font-black text-white/80 group-hover/item:text-white uppercase tracking-tight">
-                                                    {user === 'master' ? 'Master Admin' :
-                                                        user === 'admin' ? 'Coordinador' :
-                                                            user === 'teacher1' ? 'Tutor/Profe' :
-                                                                user === 'parent1' ? 'Familiar' :
-                                                                    user === 'student1' ? 'Alumno 01' :
-                                                                        user === 'student2' ? 'Alumno 02' :
-                                                                            'Alumno 03'}
+                                                    {devUser.label}
                                                 </span>
                                             </div>
                                             <span className="material-symbols-outlined text-sm text-white/20 group-hover/item:text-primary transition-colors">login</span>
