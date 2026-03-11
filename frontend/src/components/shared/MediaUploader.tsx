@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface MediaUploaderProps {
     onUpload: (url: string, type: string) => void;
-    accept?: 'image' | 'audio' | 'video' | 'all';
+    accept?: 'image' | 'audio' | 'video' | 'file' | 'documentation' | 'all';
     label?: string;
     value?: string;
     onClear?: () => void;
@@ -29,7 +29,10 @@ export default function MediaUploader({
             case 'image': return 'image/*';
             case 'audio': return 'audio/*';
             case 'video': return 'video/*';
-            default: return 'image/*,audio/*,video/*';
+            case 'file':
+            case 'documentation':
+                return 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain';
+            default: return 'image/*,audio/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain';
         }
     };
 
@@ -110,16 +113,23 @@ export default function MediaUploader({
                         >
                             {/* Previews based on type (simulated by URL path/extension) */}
                             {preview.includes('/images/') || preview.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                                <img src={`${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${preview}`} className="w-full h-full object-cover" alt="Preview" />
+                                <img src={`${(process.env.NEXT_PUBLIC_API_URL || '').replace('/api', '')}${preview}`} className="w-full h-full object-cover" alt="Preview" />
                             ) : preview.includes('/audio/') || preview.match(/\.(mp3|wav|ogg)$/i) ? (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50 text-blue-500">
                                     <div className="p-4 bg-white rounded-full shadow-md"><Play size={32} fill="currentColor" /></div>
                                     <span className="mt-2 text-xs font-bold uppercase tracking-widest">Audio cargado</span>
                                 </div>
-                            ) : (
+                            ) : preview.includes('/video/') || preview.match(/\.(mp4|webm)$/i) ? (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-green-50 text-green-500">
                                     <Film size={40} />
                                     <span className="mt-2 text-xs font-bold uppercase tracking-widest">Video cargado</span>
+                                </div>
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-amber-50 text-amber-500">
+                                    <div className="p-4 bg-white rounded-full shadow-md">
+                                        <span className="material-symbols-outlined !text-4xl">description</span>
+                                    </div>
+                                    <span className="mt-2 text-xs font-bold uppercase tracking-widest">Documento cargado</span>
                                 </div>
                             )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ResourceService, Resource, ResourceType } from '@/services/resource.service';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,12 +37,33 @@ export default function AdminResourcesPage() {
     // Data
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState<string[]>([]);
-
+    
     // Filters
     const [typeFilter, setTypeFilter] = useState<ResourceType>(ResourceType.IMAGE);
     const [categoryFilter, setCategoryFilter] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Categories are now derived from resources and filtered by type
+    const categoriesByType = useMemo(() => {
+        const cats: Record<string, string[]> = {
+            [ResourceType.IMAGE]: ['General'],
+            [ResourceType.VIDEO]: ['General'],
+            [ResourceType.LINK]: ['General'],
+            [ResourceType.FILE]: ['General'],
+            [ResourceType.DOCUMENTATION]: ['General'],
+        };
+
+        resources.forEach(res => {
+            if (res.category && !cats[res.type].includes(res.category)) {
+                cats[res.type].push(res.category);
+            }
+        });
+
+        Object.keys(cats).forEach(type => cats[type].sort());
+        return cats;
+    }, [resources]);
+
+    const currentCategories = useMemo(() => categoriesByType[typeFilter], [categoriesByType, typeFilter]);
 
     // Category management
     const [showCatManager, setShowCatManager] = useState(false);
@@ -62,19 +83,7 @@ export default function AdminResourcesPage() {
     const [newCatInModalValue, setNewCatInModalValue] = useState('');
 
     // Init
-    useEffect(() => { fetchResources(); fetchCategories(); }, []);
-
-    const fetchCategories = async () => {
-        try {
-            const res = await fetch(`${API}/resources/categories`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setCategories(data.length > 0 ? data : ['General']);
-            }
-        } catch (e) { console.error(e); }
-    };
+    useEffect(() => { fetchResources(); }, []);
 
     const fetchResources = async () => {
         setLoading(true);
@@ -95,11 +104,17 @@ export default function AdminResourcesPage() {
             setEditingResource(resource);
             setFormData({
                 title: resource.title, description: resource.description || '',
-                type: resource.type, url: resource.url, category: resource.category || '',
+                type: resource.type, url: resource.url, category: resource.category || 'General',
             });
         } else {
             setEditingResource(null);
-            setFormData({ title: '', description: '', type: typeFilter, url: '', category: contextualCategories[0] || categories[0] || 'General' });
+            setFormData({ 
+                title: '', 
+                description: '', 
+                type: typeFilter, 
+                url: '', 
+                category: currentCategories[0] || 'General' 
+            });
         }
         setShowModal(true);
     };
@@ -117,7 +132,6 @@ export default function AdminResourcesPage() {
             }
             setShowModal(false);
             fetchResources();
-            fetchCategories();
         } catch (error) { toast.error('Error al guardar'); }
         finally { setSaving(false); }
     };
@@ -129,59 +143,72 @@ export default function AdminResourcesPage() {
             confirmText: 'Eliminar', cancelText: 'Cancelar', variant: 'danger'
         });
         if (!ok) return;
-        try { await ResourceService.delete(id); toast.success('Recurso eliminado'); fetchResources(); fetchCategories(); }
+        try { await ResourceService.delete(id); toast.success('Recurso eliminado'); fetchResources(); }
         catch { toast.error('Error al eliminar'); }
     };
 
-    // Category CRUD
+    // Category CRUD (Scoped to type)
     const renameCategory = async (oldName: string) => {
         if (!editCatValue.trim() || editCatValue === oldName) { setEditingCat(null); return; }
         try {
-            await fetch(`${API}/resources/categories/${encodeURIComponent(oldName)}`, {
-                method: 'PATCH', headers: authHeaders(),
-                body: JSON.stringify({ newName: editCatValue.trim() })
-            });
-            toast.success('Categoría renombrada');
-            setEditingCat(null); fetchCategories(); fetchResources();
+            // Updated backend logic would be needed for type-scoped rename, but for now we update all resources of current type
+            const resourcesToUpdate = resources.filter(r => r.type === typeFilter && r.category === oldName);
+            for (const r of resourcesToUpdate) {
+                await ResourceService.update(r.id, { category: editCatValue.trim() });
+            }
+            toast.success(`Categoría renombrada para ${TYPE_LABELS[typeFilter]}`);
+            setEditingCat(null); fetchResources();
         } catch { toast.error('Error al renombrar'); }
     };
 
     const deleteCategory = async (name: string) => {
         const ok = await confirm({
             title: 'Eliminar categoría',
-            message: `Los recursos de "${name}" se moverán a "General". ¿Continuar?`,
+            message: `Los recursos de "${name}" en "${TYPE_LABELS[typeFilter]}" se moverán a "General". ¿Continuar?`,
             confirmText: 'Eliminar', cancelText: 'Cancelar', variant: 'danger'
         });
         if (!ok) return;
         try {
-            await fetch(`${API}/resources/categories/${encodeURIComponent(name)}`, {
-                method: 'DELETE', headers: authHeaders()
-            });
+            const resourcesToUpdate = resources.filter(r => r.type === typeFilter && r.category === name);
+            for (const r of resourcesToUpdate) {
+                await ResourceService.update(r.id, { category: 'General' });
+            }
             toast.success('Categoría eliminada');
-            fetchCategories(); fetchResources();
+            fetchResources();
         } catch { toast.error('Error al eliminar'); }
     };
 
-    // Filtering
-    const typeFilteredResources = resources.filter(res => res.type === typeFilter);
+    const createCategoryInModal = () => {
+        if (!newCatInModalValue.trim()) return;
+        setFormData({ ...formData, category: newCatInModalValue.trim() });
+        setShowNewCatInModal(false);
+        setNewCatInModalValue('');
+        toast.success('Categoría lista para el nuevo recurso');
+    };
 
-    // Categories contextual to the selected type
-    const contextualCategories = [...new Set(typeFilteredResources.map(r => r.category || 'General'))].sort();
+    const addNewCategoryManually = () => {
+        if (!newCatInput.trim()) return;
+        // To "create" a category without a resource, we'd need a separate table or just trust the memo
+        // For now, we'll notify that it will appear once a resource is added to it
+        setCategoryFilter(newCatInput.trim());
+        setNewCatInput('');
+        setShowNewCat(false);
+        toast.info(`Categoría "${newCatInput}" seleccionada. Crea un recurso para guardarla.`);
+    };
 
-    // Auto-select the first category when type changes or categories load
+    // Auto-select the first category when type changes
     useEffect(() => {
-        if (contextualCategories.length > 0 && !contextualCategories.includes(categoryFilter)) {
-            setCategoryFilter(contextualCategories[0]);
-        } else if (contextualCategories.length === 0) {
-            setCategoryFilter('');
+        if (currentCategories.length > 0 && !currentCategories.includes(categoryFilter)) {
+            setCategoryFilter(currentCategories[0]);
         }
-    }, [typeFilter, contextualCategories.length]);
+    }, [typeFilter, currentCategories]);
 
-    const filtered = typeFilteredResources.filter(res => {
+    const filtered = resources.filter(res => {
+        const okType = res.type === typeFilter;
         const okCat = !categoryFilter || (res.category || 'General') === categoryFilter;
         const okSearch = !searchTerm || res.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (res.description?.toLowerCase().includes(searchTerm.toLowerCase()));
-        return okCat && okSearch;
+        return okType && okCat && okSearch;
     });
 
     const mainTypes = [ResourceType.IMAGE, ResourceType.VIDEO, ResourceType.LINK, ResourceType.FILE, ResourceType.DOCUMENTATION];
@@ -218,6 +245,29 @@ export default function AdminResourcesPage() {
                             ))}
                         </div>
                     </div>
+
+                    {typeFilter === ResourceType.DOCUMENTATION && (
+                        <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[2rem] p-6 text-white shadow-xl shadow-amber-500/20">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="material-symbols-outlined text-3xl">lightbulb</span>
+                                <h4 className="font-black text-lg">Guía de Uso</h4>
+                            </div>
+                            <ul className="space-y-4 text-sm font-medium opacity-90">
+                                <li className="flex gap-3">
+                                    <span className="font-black opacity-50">01</span>
+                                    <span>Sube guías didácticas o fichas imprimibles en PDF/DOC.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="font-black opacity-50">02</span>
+                                    <span>Asigna una categoría (Ej: "Matemáticas - Unidad 1").</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="font-black opacity-50">03</span>
+                                    <span>Los profesores podrán descargarlos e imprimirlos para sus clases.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
                 </aside>
 
                 {/* Main Content Area */}
@@ -235,47 +285,68 @@ export default function AdminResourcesPage() {
 
                             {/* Categories */}
                             <div className="flex-1 w-full overflow-x-auto hide-scrollbar flex gap-2 items-center px-2 border-l-0 md:border-l border-slate-100 dark:border-slate-800 pl-4">
-                                <span className="hidden md:inline text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2 shrink-0">Categorías:</span>
-                                {contextualCategories.length > 0 ? contextualCategories.map(cat => (
+                                <span className="hidden md:inline text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2 shrink-0">Categorías {TYPE_LABELS[typeFilter]}:</span>
+                                {currentCategories.length > 0 ? currentCategories.map(cat => (
                                     <button key={cat} onClick={() => setCategoryFilter(cat)}
                                         className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border-2 ${categoryFilter === cat ? 'bg-slate-800 border-slate-800 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-md' : 'bg-transparent border-slate-200 text-slate-500 hover:border-slate-400'}`}>
                                         {cat}
                                     </button>
                                 )) : (
-                                    <span className="text-sm font-medium text-slate-400 italic">No hay categorías. Crea un recurso y especifícala.</span>
+                                    <span className="text-sm font-medium text-slate-400 italic">No hay categorías específicas para {TYPE_LABELS[typeFilter]}.</span>
                                 )}
                             </div>
                             <button onClick={() => setShowCatManager(!showCatManager)}
-                                className="p-3 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors shrink-0" title="Gestionar Categorías">
+                                className={`p-3 rounded-full transition-colors shrink-0 ${showCatManager ? 'bg-primary text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-slate-800 hover:bg-slate-200'}`} title="Gestionar Categorías">
                                 <span className="material-symbols-outlined">settings</span>
                             </button>
                         </div>
 
                         {/* Category manager inline */}
                         {showCatManager && (
-                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {categories.map(cat => (
-                                    <div key={cat} className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-100">
-                                        {editingCat === cat ? (
-                                            <>
-                                                <input autoFocus
-                                                    className="flex-1 px-3 py-1.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 border-2 border-primary outline-none"
-                                                    value={editCatValue} onChange={e => setEditCatValue(e.target.value)}
-                                                    onKeyDown={e => e.key === 'Enter' && renameCategory(cat)} />
-                                                <button onClick={() => renameCategory(cat)} className="p-1.5 bg-green-100 text-green-600 rounded-lg"><span className="material-symbols-outlined text-sm">check</span></button>
-                                                <button onClick={() => setEditingCat(null)} className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"><span className="material-symbols-outlined text-sm">close</span></button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="flex-1 text-sm font-bold text-slate-700 dark:text-slate-300 truncate">{cat}</span>
-                                                <button onClick={() => { setEditingCat(cat); setEditCatValue(cat); }} className="p-1.5 text-slate-400 hover:text-blue-500"><span className="material-symbols-outlined text-sm">edit</span></button>
-                                                {cat !== 'General' && (
-                                                    <button onClick={() => deleteCategory(cat)} className="p-1.5 text-slate-400 hover:text-red-500"><span className="material-symbols-outlined text-sm">delete</span></button>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
+                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in slide-in-from-top-2">
+                                <div className="flex justify-between items-center mb-4 px-2">
+                                    <h4 className="font-black text-slate-400 text-[10px] tracking-widest uppercase">Categorías en {TYPE_LABELS[typeFilter]}</h4>
+                                    <button onClick={() => setShowNewCat(true)} className="flex items-center gap-1 text-[10px] font-black text-primary hover:text-fuchsia-600 uppercase transition-colors">
+                                        <span className="material-symbols-outlined text-sm">add_circle</span> Crear Nueva
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {showNewCat && (
+                                        <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl px-3 py-2 border border-blue-100">
+                                            <input autoFocus
+                                                className="flex-1 px-3 py-1.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 border-2 border-primary outline-none"
+                                                placeholder="Nombre categoría..."
+                                                value={newCatInput} onChange={e => setNewCatInput(e.target.value)}
+                                                onKeyDown={e => e.key === 'Enter' && addNewCategoryManually()} />
+                                            <button onClick={addNewCategoryManually} className="p-1.5 bg-green-500 text-white rounded-lg shadow-sm"><span className="material-symbols-outlined text-sm">check</span></button>
+                                            <button onClick={() => setShowNewCat(false)} className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"><span className="material-symbols-outlined text-sm">close</span></button>
+                                        </div>
+                                    )}
+                                    {currentCategories.map(cat => (
+                                        <div key={cat} className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-100 transition-all hover:border-slate-300 group">
+                                            {editingCat === cat ? (
+                                                <>
+                                                    <input autoFocus
+                                                        className="flex-1 px-3 py-1.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 border-2 border-primary outline-none"
+                                                        value={editCatValue} onChange={e => setEditCatValue(e.target.value)}
+                                                        onKeyDown={e => e.key === 'Enter' && renameCategory(cat)} />
+                                                    <button onClick={() => renameCategory(cat)} className="p-1.5 bg-green-100 text-green-600 rounded-lg"><span className="material-symbols-outlined text-sm">check</span></button>
+                                                    <button onClick={() => setEditingCat(null)} className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"><span className="material-symbols-outlined text-sm">close</span></button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="flex-1 text-sm font-bold text-slate-700 dark:text-slate-300 truncate">{cat}</span>
+                                                    <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button onClick={() => { setEditingCat(cat); setEditCatValue(cat); }} className="p-1.5 text-slate-400 hover:text-blue-500 transition-colors"><span className="material-symbols-outlined text-sm">edit</span></button>
+                                                        {cat !== 'General' && (
+                                                            <button onClick={() => deleteCategory(cat)} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-sm">delete</span></button>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -330,8 +401,8 @@ export default function AdminResourcesPage() {
                             <div className="size-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
                                 <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">check_box_outline_blank</span>
                             </div>
-                            <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Sin resultados</h3>
-                            <p className="text-slate-500 max-w-sm">No hemos encontrado recursos asociados a la categoría <strong className="text-primary">{categoryFilter}</strong> para este tipo.</p>
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Sin recursos en {TYPE_LABELS[typeFilter]}</h3>
+                            <p className="text-slate-500 max-w-sm">No hay contenido asociado a la categoría <strong className="text-primary">{categoryFilter || 'General'}</strong>.</p>
                             <button onClick={() => openModal()} className="mt-8 bg-blue-50 text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-100 transition-colors">
                                 Subir un nuevo recurso
                             </button>
@@ -364,7 +435,13 @@ export default function AdminResourcesPage() {
                                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest block pl-2">Tipo de Recurso</label>
                                         <div className="grid grid-cols-2 gap-3">
                                             {mainTypes.map(type => (
-                                                <button key={type} type="button" onClick={() => setFormData({ ...formData, type })}
+                                                <button key={type} type="button" onClick={() => {
+                                                    setFormData({ 
+                                                        ...formData, 
+                                                        type, 
+                                                        category: categoriesByType[type][0] || 'General' 
+                                                    });
+                                                }}
                                                     className={`p-3 rounded-2xl flex items-center gap-3 transition-all font-bold border-2 ${formData.type === type ? (type === ResourceType.DOCUMENTATION ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-blue-600 bg-blue-50 text-blue-700') : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'}`}>
                                                     <span className={`material-symbols-outlined ${formData.type === type && type === ResourceType.DOCUMENTATION ? 'text-amber-500' : ''}`}>{TYPE_ICONS[type]}</span>
                                                     <span className="text-sm">{TYPE_LABELS[type]}</span>
@@ -382,9 +459,9 @@ export default function AdminResourcesPage() {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest block pl-2">Categoría Organizativa</label>
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest block pl-2">Categoría en {TYPE_LABELS[formData.type]}</label>
                                         <div className="flex gap-2 flex-wrap bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
-                                            {categories.map(cat => (
+                                            {categoriesByType[formData.type].map(cat => (
                                                 <button key={cat} type="button" onClick={() => setFormData({ ...formData, category: cat })}
                                                     className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border-2 ${formData.category === cat ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}>
                                                     {cat}
@@ -394,7 +471,7 @@ export default function AdminResourcesPage() {
                                                 <div className="flex items-center gap-1.5 w-full mt-2">
                                                     <input autoFocus
                                                         className="flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-white border-2 border-blue-500 outline-none"
-                                                        placeholder="Nombre..."
+                                                        placeholder="Nueva categoría..."
                                                         value={newCatInModalValue}
                                                         onChange={e => setNewCatInModalValue(e.target.value)}
                                                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), createCategoryInModal())} />
@@ -404,7 +481,7 @@ export default function AdminResourcesPage() {
                                             ) : (
                                                 <button type="button" onClick={() => setShowNewCatInModal(true)}
                                                     className="px-4 py-2 rounded-xl text-sm font-bold bg-blue-50 text-blue-600 border-2 border-transparent hover:border-blue-200 flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-sm">add</span> Nueva
+                                                    <span className="material-symbols-outlined text-sm">add</span> Crear Categoría
                                                 </button>
                                             )}
                                         </div>
@@ -428,10 +505,10 @@ export default function AdminResourcesPage() {
                                             ) : (
                                                 <div className="text-center space-y-4">
                                                     <MediaUploader
-                                                        accept={formData.type === ResourceType.IMAGE ? 'image' : formData.type === ResourceType.VIDEO ? 'video' : 'all'}
+                                                        accept={formData.type === ResourceType.IMAGE ? 'image' : formData.type === ResourceType.VIDEO ? 'video' : (formData.type === ResourceType.DOCUMENTATION ? 'documentation' : 'all')}
                                                         value={formData.url}
                                                         onUpload={(url, type) => {
-                                                            const newType = type === 'images' ? ResourceType.IMAGE : type === 'video' ? ResourceType.VIDEO : formData.type;
+                                                            const newType = type === 'images' ? ResourceType.IMAGE : type === 'video' ? ResourceType.VIDEO : (type === 'documents' ? ResourceType.DOCUMENTATION : formData.type);
                                                             setFormData({ ...formData, url, type: newType });
                                                         }}
                                                         onClear={() => setFormData({ ...formData, url: '' })}
