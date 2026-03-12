@@ -247,25 +247,40 @@ export default function AdminResourcesPage() {
                     </div>
 
                     {typeFilter === ResourceType.DOCUMENTATION && (
-                        <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[2rem] p-6 text-white shadow-xl shadow-amber-500/20">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="material-symbols-outlined text-3xl">lightbulb</span>
-                                <h4 className="font-black text-lg">Guía de Uso</h4>
-                            </div>
-                            <ul className="space-y-4 text-sm font-medium opacity-90">
-                                <li className="flex gap-3">
-                                    <span className="font-black opacity-50">01</span>
-                                    <span>Sube guías didácticas o fichas imprimibles en PDF/DOC.</span>
-                                </li>
-                                <li className="flex gap-3">
-                                    <span className="font-black opacity-50">02</span>
-                                    <span>Asigna una categoría (Ej: "Matemáticas - Unidad 1").</span>
-                                </li>
-                                <li className="flex gap-3">
-                                    <span className="font-black opacity-50">03</span>
-                                    <span>Los profesores podrán descargarlos e imprimirlos para sus clases.</span>
-                                </li>
-                            </ul>
+                        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-[2rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+                           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform duration-700">
+                               <span className="material-symbols-outlined !text-9xl">menu_book</span>
+                           </div>
+                           
+                           <div className="relative z-10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="size-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-3xl">local_library</span>
+                                    </div>
+                                    <h4 className="font-black text-2xl italic tracking-tight">Mini-Tutorial</h4>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <div className="flex gap-4">
+                                        <div className="size-8 rounded-full bg-white text-indigo-600 flex items-center justify-center font-black text-xs shrink-0 shadow-lg">1</div>
+                                        <p className="text-sm font-bold leading-snug">Sube archivos <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px]">PDF, DOCX, XLS</span> que los profes necesiten imprimir para sus clases.</p>
+                                    </div>
+                                    
+                                    <div className="flex gap-4">
+                                        <div className="size-8 rounded-full bg-white text-purple-600 flex items-center justify-center font-black text-xs shrink-0 shadow-lg">2</div>
+                                        <p className="text-sm font-bold leading-snug">Usa categorías (Ej: <span className="italic">"Matemáticas - Primaria"</span>) para que sea fácil de encontrar.</p>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <div className="size-8 rounded-full bg-white text-pink-600 flex items-center justify-center font-black text-xs shrink-0 shadow-lg">3</div>
+                                        <p className="text-sm font-bold leading-snug">Estos recursos son <span className="underline decoration-2 underline-offset-4">EXCLUSIVOS</span> para descarga de profesores, no para el juego.</p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 p-4 bg-white/10 rounded-2xl border border-white/20 text-[10px] font-black uppercase tracking-widest text-center">
+                                    ✨ ¡Organización es poder! ✨
+                                </div>
+                           </div>
                         </div>
                     )}
                 </aside>

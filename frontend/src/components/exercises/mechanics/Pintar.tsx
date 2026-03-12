@@ -1,12 +1,16 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Pipette } from 'lucide-react';
+import { Send, Pipette, Volume2, Play, Pause, Square } from 'lucide-react';
+import ExerciseStimulus from '../shared/ExerciseStimulus';
 
 interface Props {
     exercise: {
         instruction: string;
+        instructionAudioUrl?: string;
         content: {
+            stimulus?: { type: 'image' | 'text' | 'audio' | 'video', value: string, size?: 'sm' | 'md' | 'lg' };
+            instructionSize?: 'sm' | 'md' | 'lg';
             items: Array<{ id: string, imageUrl: string, label: string }>;
             colors: string[];
             correctPairs: Array<{ itemId: string, color: string }>;
@@ -18,7 +22,28 @@ interface Props {
 export default function Pintar({ exercise, onAnswer }: Props) {
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [assignments, setAssignments] = useState<Record<string, string>>({});
+    const [playingInstruction, setPlayingInstruction] = useState(false);
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
+
+    const toggleAudio = () => {
+        if (!exercise.instructionAudioUrl) return;
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+            setPlayingInstruction(false);
+        } else {
+            const audio = new Audio(exercise.instructionAudioUrl);
+            audioRef.current = audio;
+            audio.play().catch(e => console.error(e));
+            setPlayingInstruction(true);
+            audio.onended = () => {
+                setPlayingInstruction(false);
+                audioRef.current = null;
+            };
+        }
+    };
 
     const handleItemClick = (itemId: string) => {
         if (!selectedColor) return;
@@ -33,9 +58,23 @@ export default function Pintar({ exercise, onAnswer }: Props) {
 
     return (
         <div className="flex flex-col items-center w-full max-w-5xl mx-auto p-6 space-y-12">
-            <h2 className="text-2xl font-bold bg-white px-8 py-4 rounded-3xl shadow-sm">
-                {exercise.instruction}
-            </h2>
+            <div className="flex flex-col items-center gap-4 w-full">
+                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                        {exercise.instruction}
+                    </h2>
+                    {exercise.instructionAudioUrl && (
+                        <button 
+                            onClick={toggleAudio}
+                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                        >
+                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                        </button>
+                    )}
+                </div>
+
+                <ExerciseStimulus stimulus={exercise.content.stimulus} />
+            </div>
 
             <div className="flex gap-12 w-full">
                 {/* Elementos a colorear */}

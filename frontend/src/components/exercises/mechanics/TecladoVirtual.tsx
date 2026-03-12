@@ -1,12 +1,16 @@
 "use client";
 import React, { useState } from 'react';
-import { Volume2, Delete, Send } from 'lucide-react';
+import { Volume2, Delete, Send, Play, Pause, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ExerciseStimulus from '../shared/ExerciseStimulus';
 
 interface Props {
     exercise: {
         instruction: string;
+        instructionAudioUrl?: string;
         content: {
+            stimulus?: { type: 'image' | 'text' | 'audio' | 'video', value: string, size?: 'sm' | 'md' | 'lg' };
+            instructionSize?: 'sm' | 'md' | 'lg';
             audioUrl?: string;
             imageUrl?: string;
             totalSyllables: number;
@@ -19,7 +23,28 @@ interface Props {
 
 export default function TecladoVirtual({ exercise, onAnswer }: Props) {
     const [inputValue, setInputValue] = useState("");
+    const [playingInstruction, setPlayingInstruction] = useState(false);
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
+
+    const toggleAudio = () => {
+        if (!exercise.instructionAudioUrl) return;
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+            setPlayingInstruction(false);
+        } else {
+            const audio = new Audio(exercise.instructionAudioUrl);
+            audioRef.current = audio;
+            audio.play().catch(e => console.error(e));
+            setPlayingInstruction(true);
+            audio.onended = () => {
+                setPlayingInstruction(false);
+                audioRef.current = null;
+            };
+        }
+    };
 
     // Teclado con sílabas comunes o letras según el grado
     const keyboard = ["BA", "BE", "BI", "BO", "BU", "PA", "PE", "PI", "PO", "PU", "MA", "ME", "MI", "MO", "MU"];
@@ -40,9 +65,23 @@ export default function TecladoVirtual({ exercise, onAnswer }: Props) {
 
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 space-y-8">
-            <h2 className="text-2xl font-bold bg-white px-8 py-4 rounded-3xl shadow-sm text-gray-700">
-                {exercise.instruction}
-            </h2>
+            <div className="flex flex-col items-center gap-4 w-full">
+                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                        {exercise.instruction}
+                    </h2>
+                    {exercise.instructionAudioUrl && (
+                        <button 
+                            onClick={toggleAudio}
+                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                        >
+                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                        </button>
+                    )}
+                </div>
+
+                <ExerciseStimulus stimulus={exercise.content.stimulus} />
+            </div>
 
             <div className="relative group bg-white p-8 rounded-[48px] shadow-2xl border-b-8 border-gray-100 flex flex-col items-center gap-6">
                 {exercise.content.imageUrl && (

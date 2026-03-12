@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, HelpCircle, Settings, Type, ImageIcon, FolderOpen } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Save, Plus, Trash2, HelpCircle, Settings, Type, Image as ImageIcon, FolderOpen, Play, Pause, Star } from 'lucide-react';
 import MediaUploader from '../shared/MediaUploader';
 import ResourcePicker from '../shared/ResourcePicker';
 
@@ -37,9 +37,12 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
     const [type, setType] = useState(editData?.type || 'SEÑALAR_IMAGEN');
     const [instruction, setInstruction] = useState(editData?.instruction || '');
     const [difficulty, setDifficulty] = useState(editData?.difficulty || 1);
+    const [points, setPoints] = useState(editData?.points || 10);
     const [instructionAudio, setInstructionAudio] = useState(editData?.instructionAudioUrl || '');
     const [content, setContent] = useState<any>(editData?.content || {});
     const [saving, setSaving] = useState(false);
+    const [playingAudio, setPlayingAudio] = useState(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const [toast, setToast] = useState<{ msg: string; type: 'ok' | 'err' } | null>(null);
     const [pickers, setPickers] = useState<{ [key: string]: boolean }>({});
     const [subjectAreas, setSubjectAreas] = useState<any[]>([]);
@@ -65,25 +68,45 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
     // Init content based on type (only on type change when not editing)
     useEffect(() => {
         if (isEditing && type === editData?.type) return;
-        const defaults: Record<string, any> = {
-            'SEÑALAR_IMAGEN': { multipleCorrect: false, options: [], stimulus: null },
-            'OPCION_MULTIPLE': { options: [], stimulus: null },
-            'VERDADERO_FALSO': { stimulusA: { type: 'text', value: '' }, stimulusB: { type: 'text', value: '' }, correctAnswer: true },
-            'ARRASTRAR_SILABAS': { items: [{ id: 'i1', imageUrl: '', word: '', syllables: [], givenSyllables: [] }], availableSyllables: [] },
-            'UNIR_LINEAS': { leftItems: [], rightItems: [], correctPairs: [] },
-            'CLASIFICAR_GRUPOS': { groups: [{ id: 'g1', label: '' }], items: [] },
-            'PINTAR': { items: [], colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'], correctPairs: [] },
-            'TECLADO_VIRTUAL': { totalSyllables: 2, targetPosition: 1, correctSyllable: '', imageUrl: '' },
-            'AUDIO_SELECCION': { options: [], multipleCorrect: false },
-            'COMPLETAR_HUECOS': { text: '', gaps: [], imageUrl: '' },
+        const baseContent = {
+            instructionSize: 'md',
+            stimulus: null
         };
-        setContent(defaults[type] || {});
+        const defaults: Record<string, any> = {
+            'SEÑALAR_IMAGEN': { ...baseContent, multipleCorrect: false, options: [], stimulus: null },
+            'OPCION_MULTIPLE': { ...baseContent, options: [], stimulus: null },
+            'VERDADERO_FALSO': { ...baseContent, stimulusA: { type: 'text', value: '' }, stimulusB: { type: 'text', value: '' }, correctAnswer: true },
+            'ARRASTRAR_SILABAS': { ...baseContent, items: [{ id: 'i1', imageUrl: '', word: '', syllables: [], givenSyllables: [] }], availableSyllables: [] },
+            'UNIR_LINEAS': { ...baseContent, leftItems: [], rightItems: [], correctPairs: [] },
+            'CLASIFICAR_GRUPOS': { ...baseContent, groups: [{ id: 'g1', label: '' }], items: [] },
+            'PINTAR': { ...baseContent, items: [], colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'], correctPairs: [] },
+            'TECLADO_VIRTUAL': { ...baseContent, totalSyllables: 2, targetPosition: 1, correctSyllable: '', imageUrl: '' },
+            'AUDIO_SELECCION': { ...baseContent, options: [], multipleCorrect: false },
+            'COMPLETAR_HUECOS': { ...baseContent, text: '', gaps: [], imageUrl: '' },
+        };
+        setContent(defaults[type] || baseContent);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [type]);
 
     const showToast = (msg: string, type: 'ok' | 'err') => {
         setToast({ msg, type });
         setTimeout(() => setToast(null), 3000);
+    };
+
+    const toggleInstructionAudio = () => {
+        if (!instructionAudio) return;
+        if (playingAudio && audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+            setPlayingAudio(false);
+            return;
+        }
+
+        const audio = new Audio(getFullUrl(instructionAudio));
+        audioRef.current = audio;
+        audio.play();
+        setPlayingAudio(true);
+        audio.onended = () => setPlayingAudio(false);
     };
 
     const handleSave = async () => {
@@ -109,6 +132,7 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
                     type,
                     instruction,
                     difficulty,
+                    points: Number(points),
                     subjectAreaId: subjectAreaId || null,
                     instructionAudioUrl: instructionAudio || null,
                     content
@@ -179,16 +203,35 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
                     <h2 className="text-3xl font-black italic">
                         {isEditing ? `EDITAR EJERCICIO #${editData.id}` : 'EDITOR DE DESAFÍOS'}
                     </h2>
-                    <div className="flex gap-2">
-                        {[1, 2, 3].map(d => (
-                            <button
-                                key={d}
-                                onClick={() => setDifficulty(d)}
-                                className={`w-10 h-10 rounded-xl font-bold transition-all ${difficulty === d ? 'bg-yellow-400 text-purple-900 scale-110 shadow-lg' : 'bg-white/20 text-white'}`}
-                            >
-                                {d}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-6">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase opacity-60 ml-2 tracking-widest block">Dificultad</label>
+                            <div className="flex gap-2">
+                                {[1, 2, 3].map(d => (
+                                    <button
+                                        key={d}
+                                        type="button"
+                                        onClick={() => setDifficulty(d)}
+                                        className={`w-12 h-12 rounded-2xl font-black transition-all border-2 ${difficulty === d ? 'bg-yellow-400 text-purple-900 border-yellow-200 scale-110 shadow-lg' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`}
+                                    >
+                                        {d}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase opacity-60 ml-2 tracking-widest block">Puntos GPE</label>
+                            <div className="flex items-center bg-white/10 rounded-2xl border-2 border-white/20 p-1 px-3 h-14">
+                                <Star size={20} className="text-yellow-400 mr-2" />
+                                <input 
+                                    type="number" 
+                                    className="bg-transparent text-white font-black text-xl w-16 outline-none"
+                                    value={points}
+                                    onChange={(e) => setPoints(e.target.value)}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -219,28 +262,170 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
                     </div>
                     <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase opacity-60 ml-2 tracking-widest">Instrucción (Voz)</label>
-                        <MediaUploader
-                            accept="audio"
-                            onUpload={(url) => setInstructionAudio(url)}
-                            value={instructionAudio}
-                            onClear={() => setInstructionAudio('')}
-                        />
+                        <div className="flex gap-2">
+                            <div className="flex-1">
+                                <MediaUploader
+                                    accept="audio"
+                                    onUpload={(url) => setInstructionAudio(url)}
+                                    value={instructionAudio}
+                                    onClear={() => {
+                                        if (audioRef.current) audioRef.current.pause();
+                                        setInstructionAudio('');
+                                        setPlayingAudio(false);
+                                    }}
+                                />
+                            </div>
+                            {instructionAudio && (
+                                <button
+                                    onClick={toggleInstructionAudio}
+                                    className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${playingAudio ? 'bg-orange-500 text-white animate-pulse' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                                >
+                                    {playingAudio ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
-                {/* Enunciado */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                        <Type size={16} /> Enunciado del Ejercicio
-                    </label>
-                    <textarea
-                        className="w-full p-6 bg-gray-50 rounded-[32px] border-none focus:ring-4 focus:ring-purple-100 text-xl font-bold text-gray-700 transition-all outline-none min-h-[100px]"
-                        placeholder="Ej: ¿Cuál de estos animales hace 'miau'?"
-                        value={instruction}
-                        onChange={(e) => setInstruction(e.target.value)}
-                    />
+                {/* SECCIÓN: ENUNCIADO Y APOYO (ESTÍMULO) */}
+                <div className="bg-white rounded-[40px] border-2 border-purple-100 shadow-sm p-8 space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-purple-50 gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-lg">
+                                <Type size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-gray-800 italic uppercase tracking-tight">ENUNCIADO Y APOYO MULTIMEDIA</h3>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lo que el alumno verá y oirá al empezar</p>
+                            </div>
+                        </div>
+
+                        {/* SELECTOR DE TAMAÑO DE TEXTO */}
+                        <div className="bg-gray-50 p-1.5 rounded-2xl flex gap-1 border border-gray-100 self-start md:self-auto">
+                            {['sm', 'md', 'lg'].map(s => (
+                                <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => setContent({ ...content, instructionSize: s })}
+                                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${content.instructionSize === s ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                                >
+                                    {s === 'sm' ? 'Letra Chica' : s === 'md' ? 'Letra Media' : 'Letra Grande'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {/* ÁREA DE TEXTO */}
+                        <div className="space-y-3">
+                            <textarea
+                                className={`w-full p-6 bg-gray-50 rounded-[32px] border-3 border-transparent focus:border-purple-200 focus:bg-white font-black text-gray-700 transition-all outline-none min-h-[120px] shadow-inner ${content.instructionSize === 'sm' ? 'text-lg' : content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}
+                                placeholder="Escribe aquí la consigna o pregunta para el alumno..."
+                                value={instruction}
+                                onChange={(e) => setInstruction(e.target.value)}
+                            />
+                        </div>
+
+                        {/* ÁREA MULTIMEDIA (APOYO) */}
+                        <div className="flex flex-col gap-4 bg-purple-50/50 rounded-[32px] border-2 border-dashed border-purple-100 p-6">
+                            <div className="flex items-center justify-between pb-2">
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest flex items-center gap-2">
+                                    <ImageIcon size={14} /> Imagen o Video de Apoyo (Opcional)
+                                </span>
+                                {content.stimulus && (
+                                    <div className="flex bg-white p-1 rounded-lg gap-1 border border-purple-100 shadow-sm">
+                                        {['sm', 'md', 'lg'].map(s => (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                onClick={() => setContent({ ...content, stimulus: { ...content.stimulus, size: s } })}
+                                                className={`px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all ${content.stimulus?.size === s ? 'bg-indigo-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                            >
+                                                Tamaño {s.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col md:flex-row gap-6">
+                                {/* Selector de tipo de estímulo */}
+                                <div className="flex md:flex-col gap-2 md:w-48 shrink-0">
+                                    {[
+                                        { id: 'none', label: 'Ninguno', icon: 'block' },
+                                        { id: 'image', label: 'Imagen', icon: 'image' },
+                                        { id: 'video', label: 'Video', icon: 'videocam' },
+                                        { id: 'text', label: 'Texto', icon: 'text_fields' }
+                                    ].map(m => (
+                                        <button
+                                            key={m.id}
+                                            type="button"
+                                            onClick={() => {
+                                                if (m.id === 'none') setContent({ ...content, stimulus: null });
+                                                else setContent({ ...content, stimulus: { type: m.id, value: '', size: 'md' } });
+                                            }}
+                                            className={`flex-1 flex md:flex-row flex-col items-center md:items-start md:justify-start justify-center p-3 rounded-2xl border-2 transition-all font-black text-[9px] uppercase gap-2 ${(!content.stimulus && m.id === 'none') || (content.stimulus?.type === m.id) ? 'border-purple-500 bg-white text-purple-600 shadow-sm' : 'border-transparent text-gray-400 hover:bg-white/40'}`}
+                                        >
+                                            <span className="material-symbols-outlined !text-xl">{m.icon}</span>
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Controles de subida / selección */}
+                                <div className="flex-1">
+                                    <AnimatePresence mode="wait">
+                                        {content.stimulus && (
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 10 }}
+                                                className="h-full flex flex-col justify-center"
+                                            >
+                                                {content.stimulus.type === 'text' ? (
+                                                    <input 
+                                                        className="w-full p-6 bg-white rounded-3xl font-black text-2xl border-2 border-purple-100 outline-none focus:border-purple-400 text-center shadow-inner"
+                                                        placeholder="Escribe la palabra resaltada..."
+                                                        value={content.stimulus.value}
+                                                        onChange={(e) => setContent({ ...content, stimulus: { ...content.stimulus, value: e.target.value } })}
+                                                    />
+                                                ) : (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                                                        <div className="w-full">
+                                                            <MediaUploader 
+                                                                accept={content.stimulus.type === 'image' ? 'image' : 'video'}
+                                                                onUpload={(url) => setContent({ ...content, stimulus: { ...content.stimulus, value: url } })}
+                                                                value={content.stimulus.value}
+                                                                onClear={() => setContent({ ...content, stimulus: { ...content.stimulus, value: '' } })}
+                                                                label=""
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-col gap-3">
+                                                            <button
+                                                                onClick={() => openPicker('stimulus_picker')}
+                                                                className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 border-indigo-100 hover:bg-indigo-50 hover:border-indigo-200 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                                            >
+                                                                <FolderOpen size={20} /> Buscar en Galería
+                                                            </button>
+                                                            <p className="text-[10px] text-gray-400 font-bold text-center px-4">Puedes subir un archivo nuevo o seleccionar uno existente de la galería de recursos compartidos.</p>
+                                                        </div>
+                                                        <ResourcePicker
+                                                            open={!!pickers['stimulus_picker']}
+                                                            onSelect={(url) => setContent({ ...content, stimulus: { ...content.stimulus, value: url } })}
+                                                            onClose={() => closePicker('stimulus_picker')}
+                                                            accept={content.stimulus.type === 'image' ? 'image' : 'video'}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Configuración de Mecánica */}

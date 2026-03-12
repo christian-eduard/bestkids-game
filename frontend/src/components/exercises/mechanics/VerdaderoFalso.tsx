@@ -1,12 +1,16 @@
 "use client";
 import React from 'react';
-import { Volume2 } from 'lucide-react';
+import { Volume2, Play, Pause, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ExerciseStimulus from '../shared/ExerciseStimulus';
 
 interface Props {
     exercise: {
         instruction: string;
+        instructionAudioUrl?: string;
         content: {
+            stimulus?: { type: 'image' | 'text' | 'audio' | 'video', value: string, size?: 'sm' | 'md' | 'lg' };
+            instructionSize?: 'sm' | 'md' | 'lg';
             stimulusA: { type: 'audio' | 'image' | 'text', value: string };
             stimulusB: { type: 'audio' | 'image' | 'text', value: string };
             correctAnswer: boolean;
@@ -16,7 +20,28 @@ interface Props {
 }
 
 export default function VerdaderoFalso({ exercise, onAnswer }: Props) {
+    const [playingInstruction, setPlayingInstruction] = React.useState(false);
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
+
+    const toggleAudio = () => {
+        if (!exercise.instructionAudioUrl) return;
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+            setPlayingInstruction(false);
+        } else {
+            const audio = new Audio(exercise.instructionAudioUrl);
+            audioRef.current = audio;
+            audio.play().catch(e => console.error(e));
+            setPlayingInstruction(true);
+            audio.onended = () => {
+                setPlayingInstruction(false);
+                audioRef.current = null;
+            };
+        }
+    };
 
     const handleAnswer = (val: boolean) => {
         const timeMs = Date.now() - startTime.current;
@@ -41,9 +66,23 @@ export default function VerdaderoFalso({ exercise, onAnswer }: Props) {
 
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 space-y-12">
-            <h2 className="text-3xl font-bold text-gray-700 text-center bg-white px-12 py-6 rounded-[32px] shadow-sm">
-                {exercise.instruction}
-            </h2>
+            <div className="flex flex-col items-center gap-4 w-full">
+                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                        {exercise.instruction}
+                    </h2>
+                    {exercise.instructionAudioUrl && (
+                        <button 
+                            onClick={toggleAudio}
+                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                        >
+                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                        </button>
+                    )}
+                </div>
+
+                <ExerciseStimulus stimulus={exercise.content.stimulus} />
+            </div>
 
             <div className="flex items-center gap-16">
                 <div className="bg-white p-6 rounded-[40px] shadow-xl border-4 border-blue-50 w-64 h-64 flex items-center justify-center">

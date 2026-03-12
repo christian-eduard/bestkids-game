@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from 'react';
-import { Volume2, Check, Send } from 'lucide-react';
+import { Volume2, Check, Send, Play, Pause, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ExerciseStimulus from '../shared/ExerciseStimulus';
 
 interface Option {
     id: string;
@@ -13,9 +14,10 @@ interface Option {
 interface Props {
     exercise: {
         instruction: string;
+        instructionAudioUrl?: string;
         content: {
-            stimulusText?: string;
-            stimulusImageUrl?: string;
+            stimulus?: { type: 'image' | 'text' | 'audio' | 'video', value: string, size?: 'sm' | 'md' | 'lg' };
+            instructionSize?: 'sm' | 'md' | 'lg';
             options: Option[];
             multipleCorrect: boolean;
         }
@@ -26,18 +28,34 @@ interface Props {
 export default function AudioSeleccion({ exercise, onAnswer }: Props) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [playingId, setPlayingId] = useState<string | null>(null);
+    const [playingInstruction, setPlayingInstruction] = useState(false);
     const startTime = React.useRef(Date.now());
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
-    // Stop audio on unmount
-    React.useEffect(() => {
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
+    const toggleInstructionAudio = () => {
+        if (!exercise.instructionAudioUrl) return;
+        if (playingInstruction && audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+            setPlayingInstruction(false);
+            setPlayingId(null);
+        } else {
+            // Stop current options audio
+            if (audioRef.current) audioRef.current.pause();
+            
+            const audio = new Audio(exercise.instructionAudioUrl);
+            audioRef.current = audio;
+            audio.play().catch(e => console.error(e));
+            setPlayingInstruction(true);
+            setPlayingId('instruction');
+            audio.onended = () => {
+                setPlayingInstruction(false);
+                setPlayingId(null);
                 audioRef.current = null;
-            }
-        };
-    }, []);
+            };
+        }
+    };
 
     const playAudio = (id: string, url: string) => {
         // Toggle off if same id
@@ -45,6 +63,7 @@ export default function AudioSeleccion({ exercise, onAnswer }: Props) {
             audioRef.current.pause();
             audioRef.current = null;
             setPlayingId(null);
+            setPlayingInstruction(false);
             return;
         }
 
@@ -55,6 +74,7 @@ export default function AudioSeleccion({ exercise, onAnswer }: Props) {
         }
 
         setPlayingId(id);
+        setPlayingInstruction(false);
         const audio = new Audio(url);
         audioRef.current = audio;
         audio.onended = () => {
@@ -90,17 +110,23 @@ export default function AudioSeleccion({ exercise, onAnswer }: Props) {
 
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 space-y-12">
-            <h2 className="text-2xl font-bold bg-white px-8 py-4 rounded-3xl shadow-sm text-center">
-                {exercise.instruction}
-            </h2>
-
-            {/* Estímulo Central */}
-            {(exercise.content.stimulusText || exercise.content.stimulusImageUrl) && (
-                <div className="bg-white p-10 rounded-[64px] shadow-2xl border-4 border-blue-50 flex flex-col items-center gap-4">
-                    {exercise.content.stimulusImageUrl && <img src={exercise.content.stimulusImageUrl} className="h-48" alt="" />}
-                    {exercise.content.stimulusText && <span className="text-6xl font-black text-purple-600 underline decoration-orange-300 underline-offset-8">{exercise.content.stimulusText}</span>}
+            <div className="flex flex-col items-center gap-4 w-full">
+                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                        {exercise.instruction}
+                    </h2>
+                    {exercise.instructionAudioUrl && (
+                        <button 
+                            onClick={toggleInstructionAudio}
+                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                        >
+                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                        </button>
+                    )}
                 </div>
-            )}
+
+                <ExerciseStimulus stimulus={exercise.content.stimulus} />
+            </div>
 
             {/* Opciones de Audio */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
