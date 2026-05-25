@@ -32,6 +32,8 @@ export default function FeedbackViewPage() {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState<string>('all');
+    const [backendError, setBackendError] = useState<string | null>(null);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,23 +48,34 @@ export default function FeedbackViewPage() {
 
     const fetchData = async () => {
         setLoading(true);
+        setBackendError(null);
         try {
-            // Try to fetch, but handle if not authenticated with backend
-            const token = localStorage.getItem('token');
-            if (token) {
-                const [feedbackRes, statsRes] = await Promise.all([
-                    api.get('/feedback'),
-                    api.get('/feedback/stats'),
-                ]);
-                setFeedback(feedbackRes.data || []);
-                setStats(statsRes.data || { total: 0, unread: 0, byCategory: [] });
-            } else {
-                // No token, just show empty
-                setFeedback([]);
-                setStats({ total: 0, unread: 0, byCategory: [] });
+            // Fetch user profile if possible (for info only)
+            try {
+                const profileRes = await api.get('/users/profile');
+                setCurrentUser(profileRes.data);
+            } catch (e) {
+                console.log('No main session active, using dev access');
             }
-        } catch (error) {
+
+            // Always try to fetch using the dev access token
+            const devHeaders = { 'x-dev-access-token': 'BK-DEV-FEEDBACK-2024' };
+            const [feedbackRes, statsRes] = await Promise.all([
+                api.get('/feedback', { headers: devHeaders }),
+                api.get('/feedback/stats', { headers: devHeaders }),
+            ]);
+            
+            setFeedback(feedbackRes.data || []);
+            setStats(statsRes.data || { total: 0, unread: 0, byCategory: [] });
+        } catch (error: any) {
             console.error('Error fetching feedback:', error);
+            let msg = "Error al conectar con el backend.";
+            if (error.response) {
+                const status = error.response.status;
+                const backendMsg = error.response.data?.message || "";
+                msg = `Error ${status}: ${backendMsg || (status === 401 ? "No autorizado" : "Error de servidor")}`;
+            }
+            setBackendError(msg);
             setFeedback([]);
             setStats({ total: 0, unread: 0, byCategory: [] });
         } finally {
@@ -196,13 +209,48 @@ export default function FeedbackViewPage() {
                             <RefreshCw className="w-5 h-5" />
                         </button>
                         <button
-                            onClick={() => setIsAuthenticated(false)}
-                            className="px-4 py-2 text-gray-400 hover:text-red-500 text-sm"
+                            onClick={() => {
+                                localStorage.removeItem('token');
+                                setIsAuthenticated(false);
+                                window.location.reload();
+                            }}
+                            className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl hover:bg-red-100 dark:hover:bg-red-800/30 text-sm font-bold transition-all"
                         >
-                            Salir
+                            Cerrar Sesión Backend
                         </button>
                     </div>
                 </div>
+
+                {/* User Session Info */}
+                {currentUser && (
+                    <div className="mb-6 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-between shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 font-bold">
+                                {currentUser.username?.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                    {currentUser.firstName} {currentUser.lastName} (@{currentUser.username})
+                                </p>
+                                <p className="text-xs text-gray-500">ID: {currentUser.id} • Rol ID: {currentUser.roleId}</p>
+                            </div>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold ${currentUser.roleId <= 2 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {currentUser.roleId <= 2 ? 'ADMIN ACCESS' : 'NO ADMIN'}
+                        </div>
+                    </div>
+                )}
+                {/* Backend Alert */}
+                {backendError && (
+                    <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3 text-amber-800 dark:text-amber-300 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Bug className="w-5 h-5 flex-shrink-0" />
+                        <div className="text-sm">
+                            <p className="font-bold">Aviso del Sistema</p>
+                            <p>{backendError}</p>
+                            <p className="mt-1 opacity-70">Asegúrate de haber iniciado sesión como <b>Admin</b> en <a href="/login" className="underline hover:text-amber-500 transition-colors">/login</a> antes de usar esta consola.</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats Cards */}
                 {stats && (

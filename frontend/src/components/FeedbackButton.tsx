@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { MessageSquarePlus, X, Send, Loader2, History, Clock, Bug, Lightbulb, Sparkles, Camera, Image as ImageIcon, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LocalFeedback {
     id: string;
@@ -12,10 +13,15 @@ interface LocalFeedback {
     screenshot?: string;
 }
 
-const STORAGE_KEY = 'bestkids_feedback_history';
-
 export function FeedbackButton() {
+    const { user, isAuthenticated } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    
+    // Dynamic storage key based on user ID to avoid shared history
+    const storageKey = useMemo(() => {
+        if (user?.id) return `bestkids_feedback_history_${user.id}`;
+        return 'bestkids_feedback_history_guest';
+    }, [user?.id]);
     const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
     const [message, setMessage] = useState('');
     const [category, setCategory] = useState('sugerencia');
@@ -29,29 +35,63 @@ export function FeedbackButton() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Load history from localStorage
+    // Load history from localStorage and Server
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem(STORAGE_KEY);
+        const loadHistory = async () => {
+            // 1. Load from local storage (specific to current user)
+            const stored = localStorage.getItem(storageKey);
+            let localData: LocalFeedback[] = [];
             if (stored) {
                 try {
-                    setLocalHistory(JSON.parse(stored));
+                    localData = JSON.parse(stored);
                 } catch (e) {
                     console.error('Error parsing feedback history:', e);
                 }
             }
+
+            // 2. Load from server if authenticated
+            if (isAuthenticated && user) {
+                try {
+                    const response = await api.get('/feedback/my');
+                    const serverData: LocalFeedback[] = response.data.map((f: any) => ({
+                        id: f.id.toString(),
+                        message: f.message,
+                        category: f.category,
+                        timestamp: new Date(f.createdAt).getTime(),
+                        isRead: f.isRead
+                    }));
+                    
+                    // Merge and sort by timestamp
+                    const combined = [...localData];
+                    serverData.forEach(sf => {
+                        if (!combined.find(cf => cf.message === sf.message && Math.abs(cf.timestamp - sf.timestamp) < 5000)) {
+                            combined.push(sf);
+                        }
+                    });
+                    setLocalHistory(combined.sort((a, b) => b.timestamp - a.timestamp));
+                } catch (e) {
+                    console.error('Error fetching server history:', e);
+                    setLocalHistory(localData);
+                }
+            } else {
+                setLocalHistory(localData);
+            }
+        };
+
+        if (typeof window !== 'undefined') {
+            loadHistory();
         }
-    }, []);
+    }, [storageKey, isAuthenticated, user]);
 
     const saveToLocalHistory = (feedback: LocalFeedback) => {
         const updated = [feedback, ...localHistory].slice(0, 20); // Keep last 20
         setLocalHistory(updated);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        localStorage.setItem(storageKey, JSON.stringify(updated));
     };
 
     const clearHistory = () => {
         setLocalHistory([]);
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(storageKey);
     };
 
     // Screenshot capture using html2canvas approach (basic version)
@@ -133,7 +173,7 @@ export function FeedbackButton() {
             }, 1500);
         } catch (error) {
             console.error('Error sending feedback:', error);
-            // Still save locally even if API fails
+            // Save to local history anyway
             saveToLocalHistory({
                 id: Date.now().toString(),
                 message: message.trim(),
@@ -141,13 +181,9 @@ export function FeedbackButton() {
                 timestamp: Date.now(),
                 screenshot: screenshot || undefined,
             });
-            setSent(true);
-            setMessage('');
-            setScreenshot(null);
-            setTimeout(() => {
-                setSent(false);
-                setActiveTab('history');
-            }, 1500);
+            
+            alert('No se pudo enviar al servidor (posible falta de sesión). Se ha guardado en tu historial local.');
+            setActiveTab('history');
         } finally {
             setSending(false);
         }

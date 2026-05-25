@@ -246,6 +246,18 @@ export class ExercisesService {
         return this.exerciseRepository.findOne({ where: { id } });
     }
 
+    async duplicateExercise(id: number) {
+        const original = await this.exerciseRepository.findOne({ where: { id } });
+        if (!original) throw new NotFoundException('Ejercicio no encontrado');
+
+        const { id: _id, createdAt, updatedAt, ...data } = original as any;
+        const duplicate = this.exerciseRepository.create({
+            ...data,
+            instruction: `${original.instruction || ''} (Copia)`.trim(),
+        });
+        return this.exerciseRepository.save(duplicate);
+    }
+
     async getUserStats(userId: number) {
         const stats = await this.resultRepository.find({
             where: { userId },

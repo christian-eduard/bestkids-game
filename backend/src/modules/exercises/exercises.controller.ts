@@ -100,4 +100,10 @@ export class ExercisesController {
     async deleteExercise(@Param('id') id: string) {
         return this.exercisesService.deleteExercise(+id);
     }
+
+    @Post('exercise/:id/duplicate')
+    @ApiOperation({ summary: 'Duplicar ejercicio (Master)' })
+    async duplicateExercise(@Param('id') id: string) {
+        return this.exercisesService.duplicateExercise(+id);
+    }
 }

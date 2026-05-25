@@ -144,4 +144,10 @@ export const ExerciseService = {
     deleteExercise: async (id: number): Promise<void> => {
         await api.delete(`/exercises/exercise/${id}`);
     },
+
+    /** Fetch a single exercise by ID */
+    getExerciseById: async (id: number | string): Promise<Exercise> => {
+        const response = await api.get(`/exercises/exercise/${id}`);
+        return response.data;
+    },
 };

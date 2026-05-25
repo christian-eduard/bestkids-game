@@ -58,7 +58,7 @@ export class GamificationProfile {
     @Column({ name: 'perfect_scores', default: 0 })
     perfectScores: number;
 
-    @Column({ default: 0 })
+    @Column({ name: 'coins', default: 0 })
     coins: number;
 
     @Column({ name: 'selected_avatar_id', nullable: true })

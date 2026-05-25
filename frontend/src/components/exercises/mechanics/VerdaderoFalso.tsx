@@ -17,9 +17,12 @@ interface Props {
         }
     };
     onAnswer: (answer: boolean, timeMs: number) => void;
+    embedded?: boolean;
+    onAnswerChange?: (answer: any) => void;
 }
 
-export default function VerdaderoFalso({ exercise, onAnswer }: Props) {
+export default function VerdaderoFalso({ exercise, onAnswer, embedded = false, onAnswerChange }: Props) {
+    const [selectedVal, setSelectedVal] = React.useState<boolean | null>(null);
     const [playingInstruction, setPlayingInstruction] = React.useState(false);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
@@ -43,9 +46,16 @@ export default function VerdaderoFalso({ exercise, onAnswer }: Props) {
         }
     };
 
-    const handleAnswer = (val: boolean) => {
-        const timeMs = Date.now() - startTime.current;
-        onAnswer(val, timeMs);
+    const handleSelect = (val: boolean) => {
+        if (embedded) {
+            setSelectedVal(val);
+            if (onAnswerChange) {
+                onAnswerChange(val);
+            }
+        } else {
+            const timeMs = Date.now() - startTime.current;
+            onAnswer(val, timeMs);
+        }
     };
 
     const renderStimulus = (stim: { type: string, value: string }) => {
@@ -65,33 +75,41 @@ export default function VerdaderoFalso({ exercise, onAnswer }: Props) {
     };
 
     return (
-        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 space-y-12">
-            <div className="flex flex-col items-center gap-4 w-full">
-                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
-                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
-                        {exercise.instruction}
-                    </h2>
-                    {exercise.instructionAudioUrl && (
-                        <button 
-                            onClick={toggleAudio}
-                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
-                        >
-                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
-                        </button>
-                    )}
-                </div>
+        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
+            {embedded ? (
+                exercise.content.stimulus ? (
+                    <div className="mb-2">
+                        <ExerciseStimulus stimulus={exercise.content.stimulus} />
+                    </div>
+                ) : null
+            ) : (
+                <div className="flex flex-col items-center gap-4 w-full">
+                    <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                        <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                            {exercise.instruction}
+                        </h2>
+                        {exercise.instructionAudioUrl && (
+                            <button 
+                                onClick={toggleAudio}
+                                className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                            >
+                                {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                            </button>
+                        )}
+                    </div>
 
-                <ExerciseStimulus stimulus={exercise.content.stimulus} />
-            </div>
+                    <ExerciseStimulus stimulus={exercise.content.stimulus} />
+                </div>
+            )}
 
             <div className="flex items-center gap-16">
-                <div className="bg-white p-6 rounded-[40px] shadow-xl border-4 border-blue-50 w-64 h-64 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-[40px] shadow-xl border-4 border-blue-50 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
                     {renderStimulus(exercise.content.stimulusA)}
                 </div>
 
                 <div className="text-4xl font-bold text-gray-300">VS</div>
 
-                <div className="bg-white p-6 rounded-[40px] shadow-xl border-4 border-blue-50 w-64 h-64 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-[40px] shadow-xl border-4 border-blue-50 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
                     {renderStimulus(exercise.content.stimulusB)}
                 </div>
             </div>
@@ -100,21 +118,29 @@ export default function VerdaderoFalso({ exercise, onAnswer }: Props) {
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => handleAnswer(true)}
-                    className="group bg-green-500 hover:bg-green-600 text-white p-12 rounded-[40px] shadow-2xl transition-all border-b-8 border-green-700"
+                    onClick={() => handleSelect(true)}
+                    className={`group text-white p-8 md:p-12 rounded-[40px] shadow-2xl transition-all border-b-8 ${
+                        selectedVal === true 
+                            ? 'bg-green-600 ring-8 ring-green-200 border-green-800 scale-105' 
+                            : 'bg-green-500 hover:bg-green-600 border-green-700'
+                    }`}
                 >
-                    <span className="text-6xl group-hover:animate-bounce block">👍</span>
-                    <span className="text-xl font-black mt-2 block">SÍ</span>
+                    <span className="text-4xl md:text-6xl group-hover:animate-bounce block">👍</span>
+                    <span className="text-lg md:text-xl font-black mt-2 block">SÍ</span>
                 </motion.button>
 
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => handleAnswer(false)}
-                    className="group bg-red-500 hover:bg-red-600 text-white p-12 rounded-[40px] shadow-2xl transition-all border-b-8 border-red-700"
+                    onClick={() => handleSelect(false)}
+                    className={`group text-white p-8 md:p-12 rounded-[40px] shadow-2xl transition-all border-b-8 ${
+                        selectedVal === false 
+                            ? 'bg-red-600 ring-8 ring-red-200 border-red-800 scale-105' 
+                            : 'bg-red-50 hover:bg-red-600 border-red-700'
+                    }`}
                 >
-                    <span className="text-6xl group-hover:animate-bounce block">👎</span>
-                    <span className="text-xl font-black mt-2 block">NO</span>
+                    <span className="text-4xl md:text-6xl group-hover:animate-bounce block">👎</span>
+                    <span className="text-lg md:text-xl font-black mt-2 block">NO</span>
                 </motion.button>
             </div>
         </div>

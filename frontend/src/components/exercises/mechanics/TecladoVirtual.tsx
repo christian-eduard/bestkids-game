@@ -19,13 +19,22 @@ interface Props {
         }
     };
     onAnswer: (answer: string, timeMs: number) => void;
+    embedded?: boolean;
+    onAnswerChange?: (answer: any) => void;
 }
 
-export default function TecladoVirtual({ exercise, onAnswer }: Props) {
+export default function TecladoVirtual({ exercise, onAnswer, embedded = false, onAnswerChange }: Props) {
     const [inputValue, setInputValue] = useState("");
     const [playingInstruction, setPlayingInstruction] = useState(false);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
+
+    // Bubble up answers
+    React.useEffect(() => {
+        if (embedded && onAnswerChange) {
+            onAnswerChange(inputValue ? inputValue : null);
+        }
+    }, [inputValue, embedded, onAnswerChange]);
 
     const toggleAudio = () => {
         if (!exercise.instructionAudioUrl) return;
@@ -64,24 +73,32 @@ export default function TecladoVirtual({ exercise, onAnswer }: Props) {
     };
 
     return (
-        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 space-y-8">
-            <div className="flex flex-col items-center gap-4 w-full">
-                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
-                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
-                        {exercise.instruction}
-                    </h2>
-                    {exercise.instructionAudioUrl && (
-                        <button 
-                            onClick={toggleAudio}
-                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
-                        >
-                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
-                        </button>
-                    )}
-                </div>
+        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-6">
+            {embedded ? (
+                exercise.content.stimulus ? (
+                    <div className="mb-2">
+                        <ExerciseStimulus stimulus={exercise.content.stimulus} />
+                    </div>
+                ) : null
+            ) : (
+                <div className="flex flex-col items-center gap-4 w-full">
+                    <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                        <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                            {exercise.instruction}
+                        </h2>
+                        {exercise.instructionAudioUrl && (
+                            <button 
+                                onClick={toggleAudio}
+                                className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                            >
+                                {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                            </button>
+                        )}
+                    </div>
 
-                <ExerciseStimulus stimulus={exercise.content.stimulus} />
-            </div>
+                    <ExerciseStimulus stimulus={exercise.content.stimulus} />
+                </div>
+            )}
 
             <div className="relative group bg-white p-8 rounded-[48px] shadow-2xl border-b-8 border-gray-100 flex flex-col items-center gap-6">
                 {exercise.content.imageUrl && (
@@ -135,18 +152,20 @@ export default function TecladoVirtual({ exercise, onAnswer }: Props) {
                 </motion.button>
             </div>
 
-            <div className="fixed bottom-12 right-12">
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleConfirm}
-                    disabled={!inputValue}
-                    className={`p-6 rounded-full shadow-2xl transition-all ${inputValue ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
-                        }`}
-                >
-                    <Send size={32} fill="currentColor" />
-                </motion.button>
-            </div>
+            {!embedded && (
+                <div className="fixed bottom-12 right-12">
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleConfirm}
+                        disabled={!inputValue}
+                        className={`p-6 rounded-full shadow-2xl transition-all ${inputValue ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
+                            }`}
+                    >
+                        <Send size={32} fill="currentColor" />
+                    </motion.button>
+                </div>
+            )}
         </div>
     );
 }

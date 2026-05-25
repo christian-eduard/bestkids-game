@@ -7,7 +7,7 @@ import MasterExerciseForm from '@/components/master/MasterExerciseForm';
 import ExercisePreview from '@/components/master/ExercisePreview';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {
-    Layers, PlusCircle, Trash2, Globe, Edit2, Play,
+    Layers, PlusCircle, Trash2, Globe, Edit2, Play, Copy,
     Settings, Plus, Save, X, Gem, ArrowLeft, ChevronDown, Search
 } from 'lucide-react';
 import Link from 'next/link';
@@ -136,6 +136,22 @@ export default function MasterExercisesPage() {
                 setConfirmDialog(prev => ({ ...prev, open: false }));
             }
         });
+    };
+
+    const handleDuplicateExercise = async (id: number) => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/exercises/exercise/${id}/duplicate`, {
+                method: 'POST', headers: headers()
+            });
+            if (res.ok) {
+                fetchExercises();
+                showToast('Ejercicio duplicado', 'ok');
+            } else {
+                showToast('Error al duplicar', 'err');
+            }
+        } catch {
+            showToast('Error al duplicar', 'err');
+        }
     };
 
     // ── Mechanics CRUD ──────────────────────────────────────────────────────
@@ -397,6 +413,12 @@ export default function MasterExercisesPage() {
                                                     className="p-2.5 bg-blue-50 text-blue-500 rounded-xl hover:bg-blue-500 hover:text-white transition-colors"
                                                     title="Editar">
                                                     <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDuplicateExercise(ex.id)}
+                                                    className="p-2.5 bg-amber-50 text-amber-500 rounded-xl hover:bg-amber-500 hover:text-white transition-colors"
+                                                    title="Duplicar">
+                                                    <Copy size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteExercise(ex.id)}

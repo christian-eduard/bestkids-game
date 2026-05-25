@@ -1,13 +1,13 @@
 -- BASE SEED (Roles & Users)
 
--- 1. Roles (Corrected columns: display_name, level)
-INSERT INTO roles (name, "display_name", description, level) VALUES
-('student', 'Estudiante', 'Rol para estudiantes', 1),
-('parent', 'Padre/Tutor', 'Rol para padres y tutores', 1),
-('teacher', 'Profesor', 'Rol para profesores', 3),
-('admin', 'Administrador', 'Rol para administradores del sistema', 4),
-('master', 'Master', 'Rol super admin', 5)
-ON CONFLICT (name) DO NOTHING;
+-- 1. Roles (Explicit IDs to match code: 1=Master, 2=Admin, 3=Teacher, 4=Parent, 5=Student)
+INSERT INTO roles (id, name, "display_name", description, level) VALUES
+(1, 'master', 'Master', 'Rol super admin', 5),
+(2, 'admin', 'Administrador', 'Rol para administradores del sistema', 4),
+(3, 'teacher', 'Profesor', 'Rol para profesores', 3),
+(4, 'parent', 'Padre/Tutor', 'Rol para padres y tutores', 2),
+(5, 'student', 'Estudiante', 'Rol para estudiantes', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
 
 -- 2. Users (Password: admin123)
 -- Hash: $2b$10$zAU7YaIyUQSruN0ObmQ0lu6Znmv/3hkJ0XP2JFEK1FYFoQjXZxHhy
@@ -20,8 +20,8 @@ INSERT INTO users (username, email, "password_hash", "role_id", "first_name", "l
 ON CONFLICT (username) DO NOTHING;
 
 -- 3. Init Gamification Profiles
-INSERT INTO gamification_profiles ("user_id", "total_points", "current_streak_days", "current_level")
-SELECT id, 0, 0, 1 FROM users WHERE username IN ('admin', 'teacher1', 'parent1', 'student1')
+INSERT INTO gamification_profiles ("user_id", "total_points", "experience_points", "coins", "current_streak_days", "current_level")
+SELECT id, 0, 0, 0, 0, 1 FROM users WHERE username IN ('admin', 'teacher1', 'parent1', 'student1')
 ON CONFLICT ("user_id") DO NOTHING;
 
 -- 4. Centers (Corrected: added 'code', removed 'country')

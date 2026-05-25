@@ -37,11 +37,13 @@ export class WorldsService {
         // Get user's total points to determine unlocked worlds
         const userPoints = await this.getUserTotalPoints(userId);
 
-        return worlds.map(world => ({
-            ...world,
-            isUnlocked: userPoints >= world.pointsToUnlock,
-            progress: this.calculateWorldProgress(world, userId),
-        }));
+        return Promise.all(
+            worlds.map(async (world) => ({
+                ...world,
+                isUnlocked: userPoints >= (world.pointsToUnlock || 0),
+                progress: await this.calculateWorldProgress(world, userId),
+            }))
+        );
     }
 
     async findOneWorld(id: number) {

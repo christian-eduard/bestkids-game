@@ -35,7 +35,7 @@ services:
       - DATABASE_PASSWORD=bestkids_password_2024_prod
       - DATABASE_NAME=bestkids_db
       - JWT_SECRET=bestkids-jwt-secret-production-2024-secure
-      - CORS_ORIGIN=http://217.154.191.3:3012
+      - CORS_ORIGIN=https://bestkids.es
     depends_on:
       - postgres
     volumes:
@@ -49,13 +49,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=http://217.154.191.3:4012/api
+        - NEXT_PUBLIC_API_URL=https://api.bestkids.es/api
     container_name: bestkids_frontend_prod
     restart: unless-stopped
     ports:
       - "3012:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://217.154.191.3:4012/api
+      - NEXT_PUBLIC_API_URL=https://api.bestkids.es/api
     depends_on:
       - backend
     networks:

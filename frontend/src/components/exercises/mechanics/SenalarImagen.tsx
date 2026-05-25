@@ -23,9 +23,11 @@ interface Props {
         }
     };
     onAnswer: (answer: any, timeMs: number) => void;
+    embedded?: boolean;
+    onAnswerChange?: (answer: any) => void;
 }
 
-export default function SeñalarImagen({ exercise, onAnswer }: Props) {
+export default function SeñalarImagen({ exercise, onAnswer, embedded = false, onAnswerChange }: Props) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [playingInstruction, setPlayingInstruction] = useState(false);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -63,12 +65,15 @@ export default function SeñalarImagen({ exercise, onAnswer }: Props) {
     }, []);
 
     const toggleOption = (id: string) => {
+        let next: string[];
         if (exercise.content.multipleCorrect) {
-            setSelectedIds(prev =>
-                prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-            );
+            next = selectedIds.includes(id) ? selectedIds.filter(i => i !== id) : [...selectedIds, id];
         } else {
-            setSelectedIds([id]);
+            next = [id];
+        }
+        setSelectedIds(next);
+        if (onAnswerChange) {
+            onAnswerChange(exercise.content.multipleCorrect ? next : next[0]);
         }
     };
 
@@ -83,25 +88,33 @@ export default function SeñalarImagen({ exercise, onAnswer }: Props) {
     };
 
     return (
-        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 space-y-8">
+        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-6">
             {/* Header: Instrucción y Audio */}
-            <div className="flex flex-col items-center gap-4 w-full">
-                <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
-                    <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
-                        {exercise.instruction}
-                    </h2>
-                    {exercise.instructionAudioUrl && (
-                        <button 
-                            onClick={toggleAudio}
-                            className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
-                        >
-                            {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
-                        </button>
-                    )}
-                </div>
+            {embedded ? (
+                exercise.content.stimulus ? (
+                    <div className="mb-2">
+                        <ExerciseStimulus stimulus={exercise.content.stimulus} />
+                    </div>
+                ) : null
+            ) : (
+                <div className="flex flex-col items-center gap-4 w-full">
+                    <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[32px] shadow-sm border-2 border-purple-100 max-w-2xl">
+                        <h2 className={`font-black text-gray-700 leading-tight ${exercise.content.instructionSize === 'sm' ? 'text-lg' : exercise.content.instructionSize === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+                            {exercise.instruction}
+                        </h2>
+                        {exercise.instructionAudioUrl && (
+                            <button 
+                                onClick={toggleAudio}
+                                className={`p-4 rounded-2xl transition-all ${playingInstruction ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-200' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
+                            >
+                                {playingInstruction ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
+                            </button>
+                        )}
+                    </div>
 
-                <ExerciseStimulus stimulus={exercise.content.stimulus} />
-            </div>
+                    <ExerciseStimulus stimulus={exercise.content.stimulus} />
+                </div>
+            )}
 
             {/* Grid de Opciones */}
             <div className={`grid grid-cols-2 ${exercise.content.options.length === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6 w-full max-w-5xl justify-center`}>
@@ -146,18 +159,20 @@ export default function SeñalarImagen({ exercise, onAnswer }: Props) {
             </div>
 
             {/* Botón Confirmar */}
-            <div className="fixed bottom-12 right-12">
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleConfirm}
-                    disabled={selectedIds.length === 0}
-                    className={`p-6 rounded-full shadow-2xl transition-all ${selectedIds.length > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
-                        }`}
-                >
-                    <Send size={32} fill="currentColor" />
-                </motion.button>
-            </div>
+            {!embedded && (
+                <div className="fixed bottom-12 right-12">
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleConfirm}
+                        disabled={selectedIds.length === 0}
+                        className={`p-6 rounded-full shadow-2xl transition-all ${selectedIds.length > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
+                            }`}
+                    >
+                        <Send size={32} fill="currentColor" />
+                    </motion.button>
+                </div>
+            )}
         </div>
     );
 }
