@@ -534,9 +534,26 @@ function validateAnswerLocal(exercise: any, answer: any): boolean {
         }
         case 'COMPLETAR_HUECOS': {
             const answers = answer as Record<string, string>;
-            return Array.isArray(content.gaps) && content.gaps.every((g: any) =>
-                answers[g.id]?.toLowerCase().trim() === g.correctAnswer.toLowerCase().trim()
-            );
+            const gaps = content.gaps || [];
+
+            // Si no hay gaps definidos, no podemos evaluar → considerar correcto
+            if (!Array.isArray(gaps) || gaps.length === 0) return true;
+
+            // Formato [gapN]: los answers tienen el id del gap (gap1, gap2...)
+            // Formato ___: los answers tienen gap0, gap1... (índice posicional)
+            const hasGapIdFormat = gaps.some((g: any) => answers[g.id] !== undefined);
+
+            if (hasGapIdFormat) {
+                // Formato [gapN] — match por id
+                return gaps.every((g: any) =>
+                    answers[g.id]?.toLowerCase().trim() === g.correctAnswer.toLowerCase().trim()
+                );
+            } else {
+                // Formato ___ — match posicional (gap0, gap1...)
+                return gaps.every((g: any, idx: number) =>
+                    answers[`gap${idx}`]?.toLowerCase().trim() === g.correctAnswer.toLowerCase().trim()
+                );
+            }
         }
         default:
             return true;

@@ -33,13 +33,20 @@ export default function CompletarHuecos({ exercise, onAnswer, embedded = false, 
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
 
+    // Contar huecos según el formato del texto
+    const gapCount = React.useMemo(() => {
+        const text = exercise.content.text || '';
+        if (/\[gap\d+\]/.test(text)) return (exercise.content.gaps || []).length;
+        return (text.match(/___/g) || []).length;
+    }, [exercise.content.text, exercise.content.gaps]);
+
     // Bubble up answers state
     React.useEffect(() => {
         if (embedded && onAnswerChange) {
-            const allFilled = exercise.content.gaps.every(g => answers[g.id] && answers[g.id].trim() !== '');
-            onAnswerChange(allFilled ? answers : null);
+            const filled = Object.values(answers).filter(v => v && v.trim() !== '').length;
+            onAnswerChange(filled >= gapCount && gapCount > 0 ? answers : null);
         }
-    }, [answers, exercise.content.gaps, embedded, onAnswerChange]);
+    }, [answers, gapCount, embedded, onAnswerChange]);
 
     const toggleAudio = () => {
         if (!exercise.instructionAudioUrl) return;
@@ -66,26 +73,55 @@ export default function CompletarHuecos({ exercise, onAnswer, embedded = false, 
     };
 
     // Parsear el texto para insertar inputs
+    // Acepta dos formatos: [gap1] o ___ (tres guiones)
     const renderContent = () => {
-        const parts = exercise.content.text.split(/(\[gap\d+\])/);
+        const text = exercise.content.text || '';
+
+        // Si contiene marcadores [gapN], usar ese formato
+        if (/\[gap\d+\]/.test(text)) {
+            const parts = text.split(/(\[gap\d+\])/);
+            return parts.map((part, idx) => {
+                const gapMatch = part.match(/\[(gap\d+)\]/);
+                if (gapMatch) {
+                    const gapId = gapMatch[1];
+                    return (
+                        <input
+                            key={idx}
+                            type="text"
+                            value={answers[gapId] || ''}
+                            onChange={(e) => setAnswers(prev => ({ ...prev, [gapId]: e.target.value }))}
+                            className="inline-block w-32 mx-2 px-2 py-1 border-b-4 border-purple-300 focus:border-purple-600 outline-none text-center font-bold text-purple-700 bg-purple-50 rounded-t-lg transition-colors"
+                            placeholder="..."
+                        />
+                    );
+                }
+                return <span key={idx}>{part}</span>;
+            });
+        }
+
+        // Formato ___ (tres guiones bajos) — usado por el formulario del master
+        const parts = text.split('___');
         return parts.map((part, idx) => {
-            const gapMatch = part.match(/\[(gap\d+)\]/);
-            if (gapMatch) {
-                const gapId = gapMatch[1];
+            const gapId = `gap${idx}`;
+            if (idx < parts.length - 1) {
                 return (
-                    <input
-                        key={idx}
-                        type="text"
-                        value={answers[gapId] || ''}
-                        onChange={(e) => setAnswers(prev => ({ ...prev, [gapId]: e.target.value }))}
-                        className="inline-block w-32 mx-2 px-2 py-1 border-b-4 border-purple-300 focus:border-purple-600 outline-none text-center font-bold text-purple-700 bg-purple-50 rounded-t-lg transition-colors"
-                        placeholder="..."
-                    />
+                    <React.Fragment key={idx}>
+                        <span>{part}</span>
+                        <input
+                            type="text"
+                            value={answers[gapId] || ''}
+                            onChange={(e) => setAnswers(prev => ({ ...prev, [gapId]: e.target.value }))}
+                            className="inline-block w-32 mx-2 px-2 py-1 border-b-4 border-purple-400 focus:border-purple-600 outline-none text-center font-bold text-purple-700 bg-purple-50 rounded-t-lg transition-colors text-xl"
+                            placeholder="..."
+                            autoFocus={idx === 0}
+                        />
+                    </React.Fragment>
                 );
             }
             return <span key={idx}>{part}</span>;
         });
     };
+
 
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-6">
@@ -131,9 +167,12 @@ export default function CompletarHuecos({ exercise, onAnswer, embedded = false, 
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={handleConfirm}
-                        disabled={Object.keys(answers).length < exercise.content.gaps.length}
-                        className={`p-6 rounded-full shadow-2xl transition-all ${Object.keys(answers).length === exercise.content.gaps.length ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
-                            }`}
+                        disabled={Object.values(answers).filter(v => v && v.trim() !== '').length < gapCount}
+                        className={`p-6 rounded-full shadow-2xl transition-all ${
+                            Object.values(answers).filter(v => v && v.trim() !== '').length >= gapCount && gapCount > 0
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-200 text-gray-400'
+                        }`}
                     >
                         <Send size={32} fill="currentColor" />
                     </motion.button>
