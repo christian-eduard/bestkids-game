@@ -3,6 +3,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -48,23 +50,33 @@ export class UsersController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get all users' })
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('master', 'admin')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get all users (master/admin only)' })
     async findAll() {
         return this.usersService.findAll();
     }
 
     @Get('students')
-    @ApiOperation({ summary: 'Get all students' })
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('master', 'admin', 'teacher')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get all students (staff only)' })
     async findAllStudents() {
         return this.usersService.findAllStudents();
     }
 
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     findOne(@Param('id') id: string) {
         return this.usersService.findOne(+id);
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     update(@Param('id') id: string, @Body() updateUserDto: any) {
         return this.usersService.update(+id, updateUserDto);
     }
