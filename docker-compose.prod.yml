@@ -11,7 +11,7 @@ services:
       POSTGRES_USER: bestkids_user
       POSTGRES_PASSWORD: bestkids_password_2024_prod
     ports:
-      - "5412:5432"
+      - "127.0.0.1:5412:5432"
     volumes:
       - bestkids_postgres_data:/var/lib/postgresql/data
     networks:
