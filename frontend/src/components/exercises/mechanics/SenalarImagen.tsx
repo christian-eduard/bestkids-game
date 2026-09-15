@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Volume2, CheckCircle2, Play, Pause, Square, Check, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Option {
     id: string;
@@ -133,7 +134,7 @@ export default function SeñalarImagen({ exercise, onAnswer, embedded = false, o
                             {option.imageUrl ? (
                                 <div className="flex-1 flex items-center justify-center w-full min-h-0">
                                     <img 
-                                        src={option.imageUrl} 
+                                        src={resolveMediaUrl(option.imageUrl)}
                                         className="max-w-full max-h-full object-contain rounded-2xl p-1" 
                                         alt={option.text || ""} 
                                     />

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Image as ImageIcon, Upload, FolderPlus } from 'lucide-react';
 import MediaUploader from './MediaUploader';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Resource {
     id: number;
@@ -81,8 +82,7 @@ export default function ResourcePicker({ open, onSelect, onClose, accept = 'imag
 
     const categories = [...new Set(resources.map(r => r.category || 'General'))];
 
-    const getFullUrl = (url: string) =>
-        url.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${url}` : url;
+    const getFullUrl = resolveMediaUrl;
 
     if (!open) return null;
 

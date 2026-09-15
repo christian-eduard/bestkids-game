@@ -208,6 +208,7 @@ export default function ExerciseEngine({ exercises, unitTitle, onFinish, isPrevi
 
     const renderMechanic = () => {
         const props = { 
+            key: currentExercise.id,
             exercise: currentExercise, 
             onAnswer: handleAnswer,
             embedded: true,
@@ -503,8 +504,15 @@ function validateAnswerLocal(exercise: any, answer: any): boolean {
             return answer === correctIds[0];
         }
         case 'OPCION_MULTIPLE': {
-            const correctId = (content.options || []).find((o: any) => o.isCorrect)?.id;
-            return answer === correctId;
+            const correctIds = (content.options || []).filter((o: any) => o.isCorrect).map((o: any) => o.id);
+            if (correctIds.length === 0) return false;
+            if (content.multipleCorrect || correctIds.length > 1) {
+                return Array.isArray(answer) &&
+                    answer.length === correctIds.length &&
+                    new Set(answer).size === answer.length &&
+                    answer.every((id: any) => correctIds.includes(id));
+            }
+            return answer === correctIds[0];
         }
         case 'VERDADERO_FALSO':
             return answer === content.correctAnswer;

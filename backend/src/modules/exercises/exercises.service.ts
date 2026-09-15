@@ -140,8 +140,15 @@ export class ExercisesService {
             }
 
             case ExerciseType.OPCION_MULTIPLE: {
-                const correctId = content.options.find((o: any) => o.isCorrect)?.id;
-                return answer === correctId;
+                const correctIds = (content.options || []).filter((o: any) => o.isCorrect).map((o: any) => o.id);
+                if (correctIds.length === 0) return false;
+                if (content.multipleCorrect || correctIds.length > 1) {
+                    return Array.isArray(answer) &&
+                        answer.length === correctIds.length &&
+                        new Set(answer).size === answer.length &&
+                        answer.every((id: any) => correctIds.includes(id));
+                }
+                return answer === correctIds[0];
             }
 
             case ExerciseType.VERDADERO_FALSO:

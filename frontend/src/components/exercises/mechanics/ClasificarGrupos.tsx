@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
 import { Volume2, Send, Play, Pause, Square } from 'lucide-react';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Props {
     exercise: {
@@ -36,7 +37,7 @@ function DraggableItem({ id, item }: { id: string, item: any }) {
             {...attributes}
             className={`cursor-grab active:cursor-grabbing p-4 min-w-[120px] bg-white rounded-3xl shadow-lg border-2 border-blue-100 flex flex-col items-center gap-2 ${isDragging ? 'opacity-50' : ''}`}
         >
-            {item.imageUrl && <img src={item.imageUrl} className="h-20 w-20 object-contain rounded-xl" alt="" />}
+            {item.imageUrl && <img src={resolveMediaUrl(item.imageUrl)} className="h-20 w-20 object-contain rounded-xl" alt="" />}
             {item.text && <span className="font-bold text-gray-700">{item.text}</span>}
             {item.syllables && (
                 <div className="flex gap-1">

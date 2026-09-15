@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { CloudUpload, X, Play, Pause, Image as ImageIcon, Film } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface MediaUploaderProps {
     onUpload: (url: string, type: string) => void;
@@ -113,7 +114,7 @@ export default function MediaUploader({
                         >
                             {/* Previews based on type (simulated by URL path/extension) */}
                             {preview.includes('/images/') || preview.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                                <img src={`${(process.env.NEXT_PUBLIC_API_URL || '').replace('/api', '')}${preview}`} className="w-full h-full object-cover" alt="Preview" />
+                                <img src={resolveMediaUrl(preview)} className="w-full h-full object-cover" alt="Preview" />
                             ) : preview.includes('/audio/') || preview.match(/\.(mp3|wav|ogg)$/i) ? (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50 text-blue-500">
                                     <div className="p-4 bg-white rounded-full shadow-md"><Play size={32} fill="currentColor" /></div>

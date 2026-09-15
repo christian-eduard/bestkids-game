@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Stimulus {
     type: 'image' | 'text' | 'audio' | 'video' | 'grid';
@@ -32,7 +33,7 @@ export default function ExerciseStimulus({ stimulus }: Props) {
         >
             {stimulus.type === 'image' && (
                 <img 
-                    src={stimulus.value} 
+                    src={resolveMediaUrl(stimulus.value)}
                     className="w-full h-auto max-h-80 object-contain rounded-2xl" 
                     alt="Estímulo" 
                 />

@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Volume2, Square } from 'lucide-react';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Item { id: string; text?: string; imageUrl?: string; }
 
@@ -141,7 +142,7 @@ export default function UnirLineas({ exercise, onAnswer, embedded = false, onAns
                             className={`w-32 h-32 bg-white rounded-3xl border-4 cursor-pointer transition-all flex items-center justify-center p-2 shadow-lg ${selectedLeft === item.id ? 'border-purple-500 scale-105 ring-4 ring-purple-100' : 'border-blue-100 hover:border-blue-200'
                                 }`}
                         >
-                            {item.imageUrl ? <img src={item.imageUrl} className="w-full h-full object-contain" alt="" /> : <span className="text-xl font-bold">{item.text}</span>}
+                            {item.imageUrl ? <img src={resolveMediaUrl(item.imageUrl)} className="w-full h-full object-contain" alt="" /> : <span className="text-xl font-bold">{item.text}</span>}
                         </div>
                     ))}
                 </div>
@@ -156,7 +157,7 @@ export default function UnirLineas({ exercise, onAnswer, embedded = false, onAns
                             className={`w-32 h-32 bg-white rounded-3xl border-4 cursor-pointer transition-all flex items-center justify-center p-2 shadow-lg ${connections.some(c => c[1] === item.id) ? 'border-green-400' : 'border-blue-100 hover:border-blue-200'
                                 }`}
                         >
-                            {item.imageUrl ? <img src={item.imageUrl} className="w-full h-full object-contain" alt="" /> : <span className="text-xl font-bold">{item.text}</span>}
+                            {item.imageUrl ? <img src={resolveMediaUrl(item.imageUrl)} className="w-full h-full object-contain" alt="" /> : <span className="text-xl font-bold">{item.text}</span>}
                         </div>
                     ))}
                 </div>

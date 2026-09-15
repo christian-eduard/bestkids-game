@@ -66,6 +66,29 @@ describe('ExercisesMechanicsValidation', () => {
         expect(validate(ExerciseType.OPCION_MULTIPLE, content, "opt1")).toBe(false);
     });
 
+    it('should require the exact set of correct options in multiple-answer mode', () => {
+        const content = {
+            multipleCorrect: true,
+            options: [
+                { id: 'melon', isCorrect: true },
+                { id: 'balon', isCorrect: true },
+                { id: 'mesa', isCorrect: false },
+            ],
+        };
+        expect(validate(ExerciseType.OPCION_MULTIPLE, content, ['balon', 'melon'])).toBe(true);
+        expect(validate(ExerciseType.OPCION_MULTIPLE, content, ['melon'])).toBe(false);
+        expect(validate(ExerciseType.OPCION_MULTIPLE, content, ['melon', 'mesa'])).toBe(false);
+        expect(validate(ExerciseType.OPCION_MULTIPLE, content, ['melon', 'melon'])).toBe(false);
+        expect(validate(ExerciseType.OPCION_MULTIPLE, content, 'melon')).toBe(false);
+    });
+
+    it('should also recognize legacy multiple correct options without the mode flag', () => {
+        const content = { options: [
+            { id: 'a', isCorrect: true }, { id: 'b', isCorrect: true },
+        ] };
+        expect(validate(ExerciseType.OPCION_MULTIPLE, content, ['a', 'b'])).toBe(true);
+    });
+
     it('should validate VERDADERO_FALSO correctly', () => {
         const content = { correctAnswer: true };
         expect(validate(ExerciseType.VERDADERO_FALSO, content, true)).toBe(true);

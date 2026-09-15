@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Plus, Trash2, HelpCircle, Settings, Type, Image as ImageIcon, FolderOpen, Play, Pause, Star } from 'lucide-react';
 import MediaUploader from '../shared/MediaUploader';
 import ResourcePicker from '../shared/ResourcePicker';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Props {
     unitId: number | null;
@@ -74,7 +75,7 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
         };
         const defaults: Record<string, any> = {
             'SEÑALAR_IMAGEN': { ...baseContent, multipleCorrect: false, options: [], stimulus: null },
-            'OPCION_MULTIPLE': { ...baseContent, options: [], stimulus: null },
+            'OPCION_MULTIPLE': { ...baseContent, multipleCorrect: false, options: [], stimulus: null },
             'VERDADERO_FALSO': { ...baseContent, stimulusA: { type: 'text', value: '' }, stimulusB: { type: 'text', value: '' }, correctAnswer: true },
             'ARRASTRAR_SILABAS': { ...baseContent, items: [{ id: 'i1', imageUrl: '', word: '', syllables: [], givenSyllables: [] }], availableSyllables: [] },
             'UNIR_LINEAS': { ...baseContent, leftItems: [], rightItems: [], correctPairs: [] },
@@ -112,6 +113,10 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
     const handleSave = async () => {
         if (!unitId || !instruction.trim()) {
             showToast('Completa el enunciado del ejercicio', 'err');
+            return;
+        }
+        if (type === 'OPCION_MULTIPLE' && !(content.options || []).some((option: any) => option.isCorrect)) {
+            showToast('Marca al menos una respuesta correcta', 'err');
             return;
         }
         setSaving(true);
@@ -154,7 +159,7 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
 
     const openPicker = (key: string) => setPickers({ ...pickers, [key]: true });
     const closePicker = (key: string) => setPickers({ ...pickers, [key]: false });
-    const getFullUrl = (url: string) => url?.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${url}` : url;
+    const getFullUrl = resolveMediaUrl;
 
     // --- Option helpers ---
     const addOption = () => {
@@ -441,6 +446,25 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
                                 <span className="font-bold text-purple-900 border-b-2 border-purple-200 pb-1">Opciones de respuesta</span>
                                 <button onClick={addOption} className="p-2 bg-purple-600 text-white rounded-xl hover:scale-110 transition-transform"><Plus size={20} /></button>
                             </div>
+                            {type === 'OPCION_MULTIPLE' && (
+                                <label className="flex items-center gap-3 font-bold text-purple-900">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!content.multipleCorrect}
+                                        onChange={(e) => {
+                                            const options = content.options || [];
+                                            const firstCorrect = options.findIndex((o: any) => o.isCorrect);
+                                            setContent({
+                                                ...content,
+                                                multipleCorrect: e.target.checked,
+                                                options: e.target.checked ? options : options.map((o: any, i: number) => ({ ...o, isCorrect: i === firstCorrect }))
+                                            });
+                                        }}
+                                        className="w-5 h-5 accent-purple-600"
+                                    />
+                                    Permitir varias respuestas correctas
+                                </label>
+                            )}
                             <div className="grid grid-cols-2 gap-4">
                                 {(content.options || []).map((opt: any, idx: number) => (
                                     <div key={opt.id} className="p-4 bg-white rounded-3xl shadow-sm border-2 border-purple-50 space-y-3 relative">
@@ -479,7 +503,7 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
                                                 type="checkbox"
                                                 checked={opt.isCorrect}
                                                 onChange={(e) => {
-                                                    if (type === 'OPCION_MULTIPLE') {
+                                                    if (type === 'OPCION_MULTIPLE' && !content.multipleCorrect) {
                                                         const opts = (content.options || []).map((o: any, i: number) => ({ ...o, isCorrect: i === idx ? e.target.checked : false }));
                                                         setContent({ ...content, options: opts });
                                                     } else {
@@ -489,7 +513,7 @@ export default function MasterExerciseForm({ unitId, onSave, editData }: Props) 
                                                 className="w-5 h-5 accent-green-500"
                                             />
                                             <span className={`text-xs font-bold ${opt.isCorrect ? 'text-green-500' : 'text-gray-400'}`}>
-                                                {opt.isCorrect ? 'CORRECTA' : 'CORRECTA'}
+                                                {opt.isCorrect ? 'CORRECTA' : 'MARCAR CORRECTA'}
                                             </span>
                                         </div>
                                     </div>

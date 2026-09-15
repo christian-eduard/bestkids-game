@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Volume2, Send, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Option {
     id: string;
@@ -18,16 +19,18 @@ interface Props {
         content: {
             stimulus?: { type: 'image' | 'text' | 'audio' | 'grid' | 'video', value: any, size?: 'sm' | 'md' | 'lg' };
             options: Option[];
+            multipleCorrect?: boolean;
             instructionSize?: 'sm' | 'md' | 'lg';
         }
     };
-    onAnswer: (answer: string, timeMs: number) => void;
+    onAnswer: (answer: string | string[], timeMs: number) => void;
     embedded?: boolean;
     onAnswerChange?: (answer: any) => void;
 }
 
 export default function OpcionMultiple({ exercise, onAnswer, embedded = false, onAnswerChange }: Props) {
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const multipleCorrect = !!exercise.content.multipleCorrect || exercise.content.options.filter(o => o.isCorrect).length > 1;
     const [playingInstruction, setPlayingInstruction] = useState(false);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
@@ -52,16 +55,19 @@ export default function OpcionMultiple({ exercise, onAnswer, embedded = false, o
     };
 
     const handleSelectOption = (id: string) => {
-        setSelectedId(id);
+        const next = multipleCorrect
+            ? selectedIds.includes(id) ? selectedIds.filter(selected => selected !== id) : [...selectedIds, id]
+            : [id];
+        setSelectedIds(next);
         if (onAnswerChange) {
-            onAnswerChange(id);
+            onAnswerChange(multipleCorrect ? next : next[0]);
         }
     };
 
     const handleConfirm = () => {
-        if (!selectedId) return;
+        if (selectedIds.length === 0) return;
         const timeMs = Date.now() - startTime.current;
-        onAnswer(selectedId, timeMs);
+        onAnswer(multipleCorrect ? selectedIds : selectedIds[0], timeMs);
     };
 
     return (
@@ -100,7 +106,7 @@ export default function OpcionMultiple({ exercise, onAnswer, embedded = false, o
                             <span className="absolute -top-2 -left-2 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold text-sm">
                                 {String.fromCharCode(65 + idx)}
                             </span>
-                            <img src={item} className="w-full h-full object-contain" alt={`Ref ${idx}`} />
+                            <img src={resolveMediaUrl(item)} className="w-full h-full object-contain" alt={`Ref ${idx}`} />
                         </div>
                     ))}
                 </div>
@@ -113,16 +119,17 @@ export default function OpcionMultiple({ exercise, onAnswer, embedded = false, o
                         whileHover={{ x: 10 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleSelectOption(option.id)}
-                        className={`p-6 rounded-2xl border-b-8 text-left font-bold text-xl transition-all flex items-center gap-4 ${selectedId === option.id
+                        aria-pressed={selectedIds.includes(option.id)}
+                        className={`p-6 rounded-2xl border-b-8 text-left font-bold text-xl transition-all flex items-center gap-4 ${selectedIds.includes(option.id)
                                 ? 'bg-purple-600 text-white border-purple-800'
                                 : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300'
                             }`}
                     >
-                        <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center ${selectedId === option.id ? 'border-white' : 'border-purple-200'
+                        <div className={`w-8 h-8 ${multipleCorrect ? 'rounded-lg' : 'rounded-full'} border-4 flex items-center justify-center ${selectedIds.includes(option.id) ? 'border-white' : 'border-purple-200'
                             }`}>
-                            {selectedId === option.id && <div className="w-3 h-3 bg-white rounded-full" />}
+                            {selectedIds.includes(option.id) && <div className={`w-3 h-3 bg-white ${multipleCorrect ? 'rounded-sm' : 'rounded-full'}`} />}
                         </div>
-                        {option.imageUrl && <img src={option.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />}
+                        {option.imageUrl && <img src={resolveMediaUrl(option.imageUrl)} className="w-12 h-12 rounded-lg object-cover" alt="" />}
                         {option.text}
                     </motion.button>
                 ))}
@@ -134,8 +141,8 @@ export default function OpcionMultiple({ exercise, onAnswer, embedded = false, o
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={handleConfirm}
-                        disabled={!selectedId}
-                        className={`p-6 rounded-full shadow-2xl transition-all ${selectedId ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
+                        disabled={selectedIds.length === 0}
+                        className={`p-6 rounded-full shadow-2xl transition-all ${selectedIds.length > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
                             }`}
                     >
                         <Send size={32} fill="currentColor" />

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
 import { Send, Volume2, Play, Pause, Square } from 'lucide-react';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Props {
     exercise: {
@@ -170,7 +171,7 @@ export default function ArrastrarSilabas({ exercise, onAnswer, embedded = false,
                     {exercise.content.items.map((item) => (
                         <div key={item.id} className="flex items-center gap-10 bg-white p-8 rounded-[48px] shadow-xl border-b-[12px] border-purple-50 relative group">
                             <div className="relative h-40 w-40 shrink-0">
-                                <img src={item.imageUrl} className="w-full h-full object-cover rounded-[32px] shadow-lg border-4 border-white" alt="" />
+                                <img src={resolveMediaUrl(item.imageUrl)} className="w-full h-full object-cover rounded-[32px] shadow-lg border-4 border-white" alt="" />
                                 {item.audioUrl && (
                                     <button onClick={() => playAudio(item.audioUrl!)} className="absolute -bottom-4 -right-4 p-4 bg-orange-500 text-white rounded-2xl shadow-xl hover:scale-110 transition-all">
                                         <Volume2 size={24} />

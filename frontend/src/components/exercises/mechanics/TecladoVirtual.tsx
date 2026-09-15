@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Volume2, Delete, Send, Play, Pause, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Props {
     exercise: {
@@ -102,7 +103,7 @@ export default function TecladoVirtual({ exercise, onAnswer, embedded = false, o
 
             <div className="relative group bg-white p-8 rounded-[48px] shadow-2xl border-b-8 border-gray-100 flex flex-col items-center gap-6">
                 {exercise.content.imageUrl && (
-                    <img src={exercise.content.imageUrl} className="h-40 rounded-3xl" alt="" />
+                    <img src={resolveMediaUrl(exercise.content.imageUrl)} className="h-40 rounded-3xl" alt="" />
                 )}
 
                 {exercise.content.audioUrl && (

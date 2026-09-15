@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Pipette, Volume2, Play, Pause, Square } from 'lucide-react';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Props {
     exercise: {
@@ -107,7 +108,7 @@ export default function Pintar({ exercise, onAnswer, embedded = false, onAnswerC
                             style={{ backgroundColor: assignments[item.id] || '#F9FAFB' }}
                         >
                             <img
-                                src={item.imageUrl}
+                                src={resolveMediaUrl(item.imageUrl)}
                                 className={`w-full h-full object-contain filter ${assignments[item.id] ? 'brightness-110 contrast-125' : 'grayscale-0'}`}
                                 alt=""
                             />

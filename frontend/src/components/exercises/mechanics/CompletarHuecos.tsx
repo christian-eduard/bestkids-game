@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Send, Volume2, Play, Pause, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Gap {
     id: string;
@@ -153,7 +154,7 @@ export default function CompletarHuecos({ exercise, onAnswer, embedded = false, 
 
             <div className="bg-white p-6 md:p-12 rounded-[48px] md:rounded-[64px] shadow-2xl border-4 border-blue-50 flex flex-col items-center gap-8 w-full">
                 {exercise.content.imageUrl && (
-                    <img src={exercise.content.imageUrl} className="h-48 rounded-3xl object-contain" alt="" />
+                    <img src={resolveMediaUrl(exercise.content.imageUrl)} className="h-48 rounded-3xl object-contain" alt="" />
                 )}
 
                 <div className="text-xl md:text-3xl leading-relaxed text-gray-700 font-medium text-center w-full">

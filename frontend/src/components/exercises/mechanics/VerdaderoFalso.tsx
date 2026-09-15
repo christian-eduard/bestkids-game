@@ -3,6 +3,7 @@ import React from 'react';
 import { Volume2, Play, Pause, Square } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ExerciseStimulus from '../shared/ExerciseStimulus';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 interface Props {
     exercise: {
@@ -60,7 +61,7 @@ export default function VerdaderoFalso({ exercise, onAnswer, embedded = false, o
 
     const renderStimulus = (stim: { type: string, value: string }) => {
         switch (stim.type) {
-            case 'image': return <img src={stim.value} className="max-h-48 rounded-2xl" alt="" />;
+            case 'image': return <img src={resolveMediaUrl(stim.value)} className="max-h-48 rounded-2xl" alt="" />;
             case 'text': return <span className="text-6xl font-black text-purple-600">{stim.value}</span>;
             case 'audio': return (
                 <button
