@@ -16,12 +16,16 @@ export type ExerciseType =
 export interface Exercise {
     id: number;
     type: ExerciseType;
+    /** @deprecated use `type` instead */
+    exerciseType?: ExerciseType | string; // alias for legacy code
     instruction: string;
     instructionAudioUrl?: string;
     backgroundImageUrl?: string;
     backgroundColor?: string;
     difficulty: number;
     points: number;
+    /** @deprecated use `points` instead */
+    rewardPoints?: number; // alias for legacy code
     order: number;
     content: any; // JSONB — structure varies per type
     isActive: boolean;
@@ -59,9 +63,14 @@ export interface SubjectArea {
 export interface SubmitResult {
     isCorrect: boolean;
     xpEarned: number;
+    /** @deprecated alias of xpEarned */
+    pointsEarned?: number;
     feedback: string;
     correctAnswer: any;
 }
+
+/** @deprecated alias of SubmitResult — use SubmitResult */
+export type ExerciseAttemptResult = SubmitResult;
 
 export interface UnitProgress {
     completed: number;
@@ -148,6 +157,16 @@ export const ExerciseService = {
     /** Fetch a single exercise by ID */
     getExerciseById: async (id: number | string): Promise<Exercise> => {
         const response = await api.get(`/exercises/exercise/${id}`);
+        return response.data;
+    },
+
+    /** @deprecated alias of submitAnswer */
+    submitAttempt: async (id: number | string, answer: any): Promise<SubmitResult> => {
+        const response = await api.post('/exercises/submit', {
+            exerciseId: Number(id),
+            answer,
+            responseTimeMs: 0,
+        });
         return response.data;
     },
 };

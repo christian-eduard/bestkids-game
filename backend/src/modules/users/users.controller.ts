@@ -36,6 +36,14 @@ export class UsersController {
         return this.usersService.findChildren(req.user.id);
     }
 
+    @Get('my-children')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get children of logged in parent (alias)' })
+    async getMyChildren(@Request() req: any) {
+        return this.usersService.findChildren(req.user.id);
+    }
+
     @Post('link-child')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()

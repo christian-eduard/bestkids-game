@@ -149,9 +149,9 @@ export default function StudentExercisesPage() {
                             className="group relative flex flex-col bg-white dark:bg-[#321a32] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-purple-100 dark:hover:border-purple-900 cursor-pointer">
                             {/* World image */}
                             <div className="aspect-[16/9] relative overflow-hidden bg-gradient-to-br from-purple-100 to-fuchsia-100 dark:from-purple-900/30 dark:to-fuchsia-900/30">
-                                {world.backgroundImageUrl ? (
+                                {(world.backgroundImage || (world as any).backgroundImageUrl) ? (
                                     <img
-                                        src={world.backgroundImageUrl.startsWith('/') ? `${API}${world.backgroundImageUrl}` : world.backgroundImageUrl}
+                                        src={(() => { const url = world.backgroundImage || (world as any).backgroundImageUrl; return url.startsWith('/') ? `${API}${url}` : url; })()}
                                         alt={world.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
