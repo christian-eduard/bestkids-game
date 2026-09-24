@@ -33,6 +33,16 @@ export default function UnirLineas({ exercise, onAnswer, embedded = false, onAns
     const startTime = useRef(Date.now());
     const containerRef = useRef<HTMLDivElement>(null);
 
+    // Shuffle right items once on mount so pairs don't appear in the same order
+    const [shuffledRightItems] = useState(() => {
+        const items = [...exercise.content.rightItems];
+        for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [items[i], items[j]] = [items[j], items[i]];
+        }
+        return items;
+    });
+
     // Bubble up answers
     useEffect(() => {
         if (embedded && onAnswerChange) {
@@ -149,7 +159,7 @@ export default function UnirLineas({ exercise, onAnswer, embedded = false, onAns
 
                 {/* Columna Derecha */}
                 <div className="flex flex-col gap-6">
-                    {exercise.content.rightItems.map(item => (
+                    {shuffledRightItems.map(item => (
                         <div
                             key={item.id}
                             id={`node-${item.id}`}

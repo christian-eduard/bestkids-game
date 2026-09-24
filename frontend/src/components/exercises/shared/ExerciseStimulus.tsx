@@ -34,14 +34,14 @@ export default function ExerciseStimulus({ stimulus }: Props) {
             {stimulus.type === 'image' && (
                 <img 
                     src={resolveMediaUrl(stimulus.value)}
-                    className="w-full h-auto max-h-80 object-contain rounded-2xl" 
+                    className="w-full h-auto max-h-44 object-contain rounded-2xl" 
                     alt="Estímulo" 
                 />
             )}
             {stimulus.type === 'video' && (
                 <video 
                     src={stimulus.value} 
-                    className="w-full h-auto max-h-80 rounded-2xl" 
+                    className="w-full h-auto max-h-44 rounded-2xl" 
                     controls 
                     autoPlay 
                     muted 

@@ -210,7 +210,6 @@ export default function ExercisePage() {
 
     return (
         <div className="container mx-auto py-8">
-            {/* Header: Progress and Navigation */}
             <div className="flex flex-col gap-6 mb-12">
                 <div className="flex items-center justify-between gap-4">
                     <Link
@@ -221,19 +220,40 @@ export default function ExercisePage() {
                         <span className="hidden md:inline">Salir</span>
                     </Link>
 
-                    <div className="flex-1 max-w-2xl px-6">
-                        <div className="flex items-center justify-between mb-2 px-2">
-                            <span className="text-xs font-black text-primary uppercase tracking-widest">Tu Progreso</span>
-                            <span className="text-xs font-black text-text-sub uppercase tracking-widest">{currentQuestionIndex + 1} de {totalQuestions}</span>
+                    {/* Progress Steps */}
+                    <div className="flex-1 flex flex-col items-center gap-2 max-w-2xl">
+                        <div className="flex items-center gap-2">
+                            {Array.from({ length: totalQuestions }).map((_, i) => {
+                                const done = i < currentQuestionIndex || (i === currentQuestionIndex && !!result);
+                                const current = i === currentQuestionIndex && !result;
+                                return (
+                                    <div key={i} className="flex items-center">
+                                        <div className={`
+                                            flex items-center justify-center rounded-full font-black text-sm transition-all duration-500
+                                            ${done
+                                                ? 'w-9 h-9 bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg shadow-amber-200'
+                                                : current
+                                                    ? 'w-10 h-10 bg-gradient-to-br from-primary to-violet-600 text-white shadow-xl shadow-primary/40 ring-4 ring-primary/20 scale-110'
+                                                    : 'w-8 h-8 bg-gray-100 dark:bg-white/10 text-gray-400'
+                                            }
+                                        `}>
+                                            {done
+                                                ? <span className="material-symbols-outlined !text-base font-black">star</span>
+                                                : i + 1
+                                            }
+                                        </div>
+                                        {i < totalQuestions - 1 && (
+                                            <div className={`h-1 w-4 md:w-8 rounded-full transition-all duration-500 ${
+                                                done ? 'bg-gradient-to-r from-amber-400 to-yellow-300' : 'bg-gray-100 dark:bg-white/10'
+                                            }`} />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div id="exercise-progress" className="h-4 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden border-2 border-white dark:border-white/10 shadow-inner">
-                            <div
-                                className="h-full bg-gradient-to-r from-primary via-violet-500 to-indigo-500 transition-all duration-1000 ease-out relative"
-                                style={{ width: `${progress}%` }}
-                            >
-                                <div className="absolute top-0 right-0 h-full w-4 bg-white/30 animate-pulse"></div>
-                            </div>
-                        </div>
+                        <span className="text-xs font-black text-text-sub uppercase tracking-widest">
+                            {currentQuestionIndex + 1} de {totalQuestions} · {Math.round(progress)}% completado
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-3">

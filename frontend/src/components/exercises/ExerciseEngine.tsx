@@ -395,9 +395,9 @@ export default function ExerciseEngine({ exercises, unitTitle, onFinish, isPrevi
                 </header>
 
                 {/* Main Workspace */}
-                <section className="flex-grow flex flex-col items-center justify-start z-10 w-full overflow-hidden mt-2">
+                <section className="flex-grow flex flex-col items-center justify-start z-10 w-full overflow-hidden mt-2 min-h-0">
                     {/* Question Prompt Area */}
-                    <div className="w-full max-w-2xl bg-white rounded-full py-3 px-6 md:px-8 border-b-4 border-[#f2e8d5] flex items-center gap-4 shadow-sm mb-4">
+                    <div className="w-full max-w-2xl bg-white rounded-full py-3 px-6 md:px-8 border-b-4 border-[#f2e8d5] flex items-center gap-4 shadow-sm mb-4 shrink-0">
                         {currentExercise.instructionAudioUrl && (
                             <button 
                                 onClick={toggleInstructionAudio}
@@ -412,7 +412,7 @@ export default function ExerciseEngine({ exercises, unitTitle, onFinish, isPrevi
                     </div>
 
                     {/* Empty/Translucent Workspace for child mechanics */}
-                    <div className="flex-grow w-full bg-white/20 rounded-[30px] md:rounded-[40px] flex flex-col items-center justify-start p-4 overflow-y-auto min-h-0">
+                    <div className="flex-grow w-full bg-white/20 rounded-[30px] md:rounded-[40px] flex flex-col items-center justify-center p-4 overflow-y-auto min-h-0">
                         {renderMechanic()}
                     </div>
                 </section>

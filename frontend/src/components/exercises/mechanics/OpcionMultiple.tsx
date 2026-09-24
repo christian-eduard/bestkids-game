@@ -35,6 +35,16 @@ export default function OpcionMultiple({ exercise, onAnswer, embedded = false, o
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const startTime = React.useRef(Date.now());
 
+    // Shuffle options once on mount (Fisher-Yates) so the correct answer isn't always in the same position
+    const [shuffledOptions] = useState(() => {
+        const opts = [...exercise.content.options];
+        for (let i = opts.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [opts[i], opts[j]] = [opts[j], opts[i]];
+        }
+        return opts;
+    });
+
     const toggleAudio = () => {
         if (!exercise.instructionAudioUrl) return;
         if (audioRef.current) {
@@ -113,7 +123,7 @@ export default function OpcionMultiple({ exercise, onAnswer, embedded = false, o
             )}
 
             <div className="flex flex-col gap-4 w-full max-w-lg">
-                {exercise.content.options.map((option) => (
+                {shuffledOptions.map((option) => (
                     <motion.button
                         key={option.id}
                         whileHover={{ x: 10 }}

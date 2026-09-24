@@ -137,7 +137,7 @@ export default function VerdaderoFalso({ exercise, onAnswer, embedded = false, o
                     className={`group text-white p-8 md:p-12 rounded-[40px] shadow-2xl transition-all border-b-8 ${
                         selectedVal === false 
                             ? 'bg-red-600 ring-8 ring-red-200 border-red-800 scale-105' 
-                            : 'bg-red-50 hover:bg-red-600 border-red-700'
+                            : 'bg-red-500 hover:bg-red-600 border-red-700'
                     }`}
                 >
                     <span className="text-4xl md:text-6xl group-hover:animate-bounce block">👎</span>
